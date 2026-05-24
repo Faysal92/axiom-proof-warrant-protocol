@@ -94,3 +94,40 @@ def test_ledger_hash_chain(tmp_path):
     ledger_path = tmp_path / "ledger.jsonl"
     append_ledger_entry(ledger_path, warrant)
     assert verify_ledger(ledger_path)
+
+
+def test_semgrep_clean_scan_allows_with_security_policy():
+    action = load_json(examples("deploy_payment_api.action.json"))
+    proof = load_json(examples("deploy_payment_api.semgrep_clean.proof_vector.json"))
+    policy = load_yaml(examples("security_policy.yml"))
+
+    warrant = evaluate(action=action, proof_vector=proof, policy=policy, now_epoch=1779100001)
+
+    assert warrant["decision"] == "ALLOW"
+    assert warrant["missing_evidence"] == []
+    assert verify_signature(warrant)
+
+
+def test_semgrep_failed_scan_blocks_with_security_policy():
+    action = load_json(examples("deploy_payment_api.action.json"))
+    proof = load_json(examples("deploy_payment_api.semgrep_failed.proof_vector.json"))
+    policy = load_yaml(examples("security_policy.yml"))
+
+    warrant = evaluate(action=action, proof_vector=proof, policy=policy, now_epoch=1779100001)
+
+    assert warrant["decision"] == "BLOCK"
+    assert any(item.startswith("contradiction:security_scan_failure") or item == "security_scan_clean:failed" for item in warrant["missing_evidence"])
+    assert verify_signature(warrant)
+
+
+def test_semgrep_missing_scan_suspends_with_security_policy():
+    action = load_json(examples("deploy_payment_api.action.json"))
+    proof = load_json(examples("deploy_payment_api.semgrep_missing.proof_vector.json"))
+    policy = load_yaml(examples("security_policy.yml"))
+
+    warrant = evaluate(action=action, proof_vector=proof, policy=policy, now_epoch=1779100001)
+
+    assert warrant["decision"] == "SUSPEND"
+    assert "security_scan_clean" in warrant["missing_evidence"]
+    assert warrant["challenge"]["resubmit_allowed"] is True
+    assert verify_signature(warrant)

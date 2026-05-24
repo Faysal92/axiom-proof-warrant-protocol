@@ -25,7 +25,7 @@ def build_warrant(
     resubmit_allowed = decision in {"SUSPEND", "REQUIRE_HUMAN_REVIEW"}
     warrant = {
         "warrant_id": f"wrn_{uuid4().hex[:12]}",
-        "protocol_version": "axiom-proof-warrant-v0.1.1",
+        "protocol_version": "axiom-proof-warrant-v0.1.2",
         "warrant_type": "EXECUTION_WARRANT",
         "status": "ISSUED" if decision in {"ALLOW", "CONDITIONAL"} else "SUSPENDED" if decision == "SUSPEND" else decision,
         "created_at": utc_now(),
@@ -61,7 +61,7 @@ def build_warrant(
         "ledger": {
             "ledger_action": "APPEND",
             "append_reason": "Warrant decision recorded for auditability.",
-            "evaluator_version": "axiom-reference-python-v0.1.1",
+            "evaluator_version": "axiom-reference-python-v0.1.2",
         },
     }
     warrant["signature"] = sign_payload(warrant)

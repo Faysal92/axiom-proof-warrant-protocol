@@ -1,0 +1,35 @@
+policy_id: security_evidence_gate_v0.1
+policy_version: 0.1.0
+
+requirement:
+  action: deploy_production
+  target: payment-api
+  context:
+    environment: production
+    criticality: critical
+    data_sensitivity: high
+    reversibility: partial
+  min_meta:
+    required_level: P4_EXECUTED
+    max_age_seconds: 864000
+    required_source_trust: high
+  required_scope:
+    target: payment-api
+    branch: main
+    environment: production
+  mandatory_dimensions:
+    - unit_tests_passed
+    - integration_tests_passed
+    - security_scan_clean
+    - rollback_available
+    - human_reviewed
+  critical_requirements:
+    - payment_edge_cases
+    - auth_regression
+  risk_policy:
+    max_risk_score: 1.0
+    human_approval_required: true
+    rollback_required: true
+    block_on_failed_security_scan: true
+    max_critical_vulnerabilities: 0
+    max_high_vulnerabilities: 0

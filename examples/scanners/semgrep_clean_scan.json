@@ -1,0 +1,12 @@
+{
+  "tool": "semgrep",
+  "tool_version": "1.x",
+  "scan_status": "passed",
+  "target": "payment-api",
+  "commit": "abc123",
+  "critical_findings": 0,
+  "high_findings": 0,
+  "medium_findings": 0,
+  "report_ref": "semgrep_report_clean_001",
+  "timestamp": "2026-05-24T18:00:00Z"
+}
