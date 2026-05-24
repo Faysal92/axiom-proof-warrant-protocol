@@ -9,3 +9,13 @@ build/
 data/*.jsonl
 examples/output.*.json
 .DS_Store
+
+# Local SSH keys accidentally generated in project root
+indep
+indep.pub
+*.pem
+*.key
+id_ed25519
+id_ed25519.pub
+id_rsa
+id_rsa.pub
