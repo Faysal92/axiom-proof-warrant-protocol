@@ -1,0 +1,29 @@
+{
+  "actor": {
+    "actor_id": "ai_coding_agent_01",
+    "actor_type": "ai_agent",
+    "identity_verified": true
+  },
+  "action": {
+    "action_type": "deploy_production",
+    "target": "payment-api",
+    "environment": "production"
+  },
+  "claim": {
+    "text": "The patch fixes the authentication bypass without changing payment behavior.",
+    "critical": true
+  },
+  "action_weight": {
+    "criticality": 0.95,
+    "irreversibility": 0.7,
+    "blast_radius": 0.9,
+    "data_sensitivity": 0.85,
+    "business_impact": 0.95,
+    "final_weight": 0.88,
+    "weighting_policy": {
+      "policy_id": "software_delivery_critical_v0.1",
+      "policy_version": "0.1.0",
+      "calculation_method": "weighted_average"
+    }
+  }
+}

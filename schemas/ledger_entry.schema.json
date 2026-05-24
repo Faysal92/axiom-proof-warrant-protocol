@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom-protocol.org/schemas/ledger_entry.schema.json",
+  "title": "AXIOM Ledger Entry",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "entry_id",
+    "entry_type",
+    "warrant_id",
+    "decision",
+    "timestamp",
+    "previous_hash",
+    "current_hash"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string"
+    },
+    "entry_type": {
+      "type": "string"
+    },
+    "warrant_id": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "CONDITIONAL",
+        "SUSPEND",
+        "REQUIRE_HUMAN_REVIEW",
+        "BLOCK"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "missing_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "previous_hash": {
+      "type": "string"
+    },
+    "current_hash": {
+      "type": "string"
+    }
+  }
+}

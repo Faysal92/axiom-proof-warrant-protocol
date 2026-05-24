@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom-protocol.org/schemas/requirement_vector.schema.json",
+  "title": "AXIOM RequirementVector",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "action",
+    "target",
+    "context",
+    "min_meta",
+    "required_scope",
+    "mandatory_dimensions",
+    "risk_policy"
+  ],
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "target": {
+      "type": "string"
+    },
+    "context": {
+      "type": "object"
+    },
+    "min_meta": {
+      "type": "object",
+      "required": [
+        "required_level",
+        "max_age_seconds"
+      ],
+      "properties": {
+        "required_level": {
+          "type": "string",
+          "enum": [
+            "P0_UNSUPPORTED",
+            "P1_PLAUSIBLE",
+            "P2_SOURCE_BACKED",
+            "P3_CROSS_CHECKED",
+            "P4_EXECUTED",
+            "P5_AUDITED"
+          ]
+        },
+        "max_age_seconds": {
+          "type": "integer"
+        },
+        "required_source_trust": {
+          "type": "string"
+        }
+      }
+    },
+    "required_scope": {
+      "type": "object"
+    },
+    "mandatory_dimensions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "critical_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risk_policy": {
+      "type": "object"
+    }
+  }
+}

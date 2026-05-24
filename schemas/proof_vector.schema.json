@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom-protocol.org/schemas/proof_vector.schema.json",
+  "title": "AXIOM ProofVector",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "meta",
+    "scope",
+    "dimensions",
+    "limitations",
+    "contradictions",
+    "evidence_refs"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "proof_level",
+        "freshness_epoch"
+      ],
+      "properties": {
+        "proof_level": {
+          "type": "string",
+          "enum": [
+            "P0_UNSUPPORTED",
+            "P1_PLAUSIBLE",
+            "P2_SOURCE_BACKED",
+            "P3_CROSS_CHECKED",
+            "P4_EXECUTED",
+            "P5_AUDITED"
+          ]
+        },
+        "source_trust": {
+          "type": "string"
+        },
+        "freshness_epoch": {
+          "type": "integer"
+        },
+        "reproducibility": {
+          "type": "string"
+        },
+        "independence": {
+          "type": "string"
+        }
+      }
+    },
+    "scope": {
+      "type": "object"
+    },
+    "dimensions": {
+      "type": "object"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

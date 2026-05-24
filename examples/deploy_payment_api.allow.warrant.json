@@ -1,0 +1,83 @@
+{
+  "warrant_id": "wrn_58458c1bdf86",
+  "protocol_version": "axiom-proof-warrant-v0.1",
+  "warrant_type": "EXECUTION_WARRANT",
+  "status": "ISSUED",
+  "created_at": "2026-05-24T14:43:51Z",
+  "expires_at": "2026-05-24T15:13:51Z",
+  "actor": {
+    "actor_id": "ai_coding_agent_01",
+    "actor_type": "ai_agent",
+    "identity_verified": true
+  },
+  "action": {
+    "action_type": "deploy_production",
+    "target": "payment-api",
+    "environment": "production"
+  },
+  "claim": {
+    "text": "The patch fixes the authentication bypass without changing payment behavior.",
+    "critical": true
+  },
+  "action_weight": {
+    "criticality": 0.95,
+    "irreversibility": 0.7,
+    "blast_radius": 0.9,
+    "data_sensitivity": 0.85,
+    "business_impact": 0.95,
+    "final_weight": 0.88,
+    "weighting_policy": {
+      "policy_id": "software_delivery_critical_v0.1",
+      "policy_version": "0.1.0",
+      "calculation_method": "weighted_average"
+    }
+  },
+  "required_proof": {
+    "min_proof_level": "P4_EXECUTED",
+    "required_evidence": [
+      "unit_tests_passed",
+      "integration_tests_passed",
+      "security_scan_clean",
+      "rollback_available",
+      "human_reviewed"
+    ]
+  },
+  "provided_proof": {
+    "proof_level": "P4_EXECUTED",
+    "evidence_refs": [
+      "git_diff_abc123",
+      "ci_unit_tests_789",
+      "ci_integration_tests_790",
+      "semgrep_scan_778",
+      "rollback_plan_45",
+      "review_102"
+    ],
+    "dimensions": {
+      "unit_tests_passed": true,
+      "integration_tests_passed": true,
+      "security_scan_clean": true,
+      "rollback_available": true,
+      "human_reviewed": true
+    },
+    "limitations": [],
+    "contradictions": []
+  },
+  "missing_evidence": [],
+  "proof_gap": {
+    "required_level": "P4_EXECUTED",
+    "provided_level": "P4_EXECUTED",
+    "gap_reason": "No material proof gap."
+  },
+  "decision": "ALLOW",
+  "reason": "Proof covers the requirement vector for this action.",
+  "ledger": {
+    "ledger_action": "APPEND",
+    "append_reason": "Warrant decision recorded for auditability.",
+    "evaluator_version": "axiom-reference-python-v0.1.0"
+  },
+  "signature": {
+    "algorithm": "HMAC-SHA256",
+    "key_id": "dev",
+    "value": "688df405d2e4d72e279a07fab8b3da3a4be846bc9bf01a716e35eff806ee2430"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "proof_level": "P3_CROSS_CHECKED",
+    "source_trust": "high",
+    "freshness_epoch": 1779100000,
+    "reproducibility": "reproducible",
+    "independence": "multiple_sources"
+  },
+  "scope": {
+    "target": "payment-api",
+    "commit": "abc123",
+    "branch": "main",
+    "environment": "production",
+    "service": "payments"
+  },
+  "dimensions": {
+    "unit_tests_passed": true,
+    "integration_tests_passed": true,
+    "security_scan_clean": false,
+    "rollback_available": true,
+    "human_reviewed": true
+  },
+  "limitations": [],
+  "contradictions": [
+    {
+      "type": "security_scan_failure",
+      "severity": "critical",
+      "summary": "Security scan reports critical auth regression."
+    }
+  ],
+  "evidence_refs": [
+    "ci_unit_tests_901",
+    "ci_integration_tests_902",
+    "semgrep_scan_critical_903"
+  ]
+}

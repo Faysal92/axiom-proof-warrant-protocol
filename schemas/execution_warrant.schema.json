@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://axiom-protocol.org/schemas/execution_warrant.schema.json",
+  "title": "AXIOM Execution Warrant",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "warrant_id",
+    "protocol_version",
+    "warrant_type",
+    "status",
+    "created_at",
+    "expires_at",
+    "actor",
+    "action",
+    "action_weight",
+    "required_proof",
+    "provided_proof",
+    "missing_evidence",
+    "proof_gap",
+    "decision",
+    "reason",
+    "challenge",
+    "ledger",
+    "signature"
+  ],
+  "properties": {
+    "warrant_id": {
+      "type": "string"
+    },
+    "protocol_version": {
+      "type": "string"
+    },
+    "warrant_type": {
+      "type": "string",
+      "const": "EXECUTION_WARRANT"
+    },
+    "status": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object"
+    },
+    "action": {
+      "type": "object"
+    },
+    "claim": {
+      "type": "object"
+    },
+    "action_weight": {
+      "type": "object"
+    },
+    "required_proof": {
+      "type": "object"
+    },
+    "provided_proof": {
+      "type": "object"
+    },
+    "missing_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "proof_gap": {
+      "type": "object"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "ALLOW",
+        "CONDITIONAL",
+        "SUSPEND",
+        "REQUIRE_HUMAN_REVIEW",
+        "BLOCK"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "challenge": {
+      "type": "object"
+    },
+    "ledger": {
+      "type": "object"
+    },
+    "signature": {
+      "type": "object"
+    }
+  }
+}

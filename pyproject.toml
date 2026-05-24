@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axiom-proof-warrant"
+version = "0.1.1"
+description = "Reference implementation for AXIOM Proof Warrant Protocol"
+requires-python = ">=3.10"
+dependencies = [
+  "PyYAML>=6.0.1",
+  "jsonschema>=4.21.1",
+  "pydantic>=2.6.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["reference/python"]

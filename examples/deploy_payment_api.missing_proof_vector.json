@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "proof_level": "P2_SOURCE_BACKED",
+    "source_trust": "high",
+    "freshness_epoch": 1779100000,
+    "reproducibility": "partially_reproducible",
+    "independence": "single_source"
+  },
+  "scope": {
+    "target": "payment-api",
+    "commit": "abc123",
+    "branch": "main",
+    "environment": "production",
+    "service": "payments"
+  },
+  "dimensions": {
+    "unit_tests_passed": true
+  },
+  "limitations": [
+    {
+      "type": "coverage_gap",
+      "domain": "payment_edge_cases",
+      "severity": "high"
+    }
+  ],
+  "contradictions": [],
+  "evidence_refs": [
+    "git_diff_abc123",
+    "ci_unit_tests_789"
+  ]
+}
