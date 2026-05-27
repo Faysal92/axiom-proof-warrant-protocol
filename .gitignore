@@ -7,44 +7,52 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Virtual env
+# Virtual envs
 .venv/
 venv/
 env/
 
-# Build / packaging
-build/
+# Node / frontend
+node_modules/
+demo-ui/node_modules/
+demo-ui/dist/
 dist/
-*.egg-info/
-*.zip
-*.tar.gz
+build/
 
-# Local runtime data
+# Runtime data / ledgers
 data/*.jsonl
-data/*.db
-data/*.sqlite
-data/*.sqlite3
-!data/.gitkeep
+data/*.log
+data/demo_ledger.jsonl
+data/ledger.jsonl
 
-# Generated demo outputs
-examples/**/output*.json
-examples/**/demo*.json
-examples/**/*.warrant.output.json
-examples/**/*.proof_vector.output.json
-examples/**/*.verified_evidence.output.json
-
-# Secrets / env
+# Env / secrets
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.crt
-secrets/
+*.p12
 
-# IDE local
+# OS / editors
+.DS_Store
+Thumbs.db
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
+# Archives / generated
+*.zip
+*.tar
+*.tar.gz
+
+# Backups
+*.bak
+
+# Local backups
+*.bak
+*.bak-*
+*.backup
+*.tmp
+
+# Generated demo outputs
+examples/output.*.warrant.json
