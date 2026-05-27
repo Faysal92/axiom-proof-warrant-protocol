@@ -1,0 +1,14 @@
+{
+  "target": "payment-api",
+  "head_sha": "abc123",
+  "branch": "main",
+  "pr_number": 102,
+  "reviews": [
+    {
+      "id": "review-102-a",
+      "state": "APPROVED",
+      "user": "maintainer@example.com",
+      "submitted_at": "2026-05-24T17:30:00Z"
+    }
+  ]
+}

@@ -1,21 +1,50 @@
+# Python
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual env
 .venv/
 venv/
-dist/
-build/
-*.egg-info/
-data/*.jsonl
-examples/output.*.json
-.DS_Store
+env/
 
-# Local SSH keys accidentally generated in project root
-indep
-indep.pub
+# Build / packaging
+build/
+dist/
+*.egg-info/
+*.zip
+*.tar.gz
+
+# Local runtime data
+data/*.jsonl
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+!data/.gitkeep
+
+# Generated demo outputs
+examples/**/output*.json
+examples/**/demo*.json
+examples/**/*.warrant.output.json
+examples/**/*.proof_vector.output.json
+examples/**/*.verified_evidence.output.json
+
+# Secrets / env
+.env
+.env.*
 *.pem
 *.key
-id_ed25519
-id_ed25519.pub
-id_rsa
-id_rsa.pub
+*.crt
+secrets/
+
+# IDE local
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

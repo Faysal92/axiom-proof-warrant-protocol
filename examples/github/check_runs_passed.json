@@ -1,0 +1,19 @@
+{
+  "target": "payment-api",
+  "head_sha": "abc123",
+  "branch": "main",
+  "check_runs": [
+    {
+      "id": "ci-run-789",
+      "name": "unit tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": "ci-run-790",
+      "name": "integration tests",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "target": "payment-api",
+  "environment": "production",
+  "commit": "abc123",
+  "branch": "main",
+  "available": true,
+  "verified": true,
+  "strategy": "blue_green_previous_version",
+  "plan_ref": "rollback_plan:payment-api:45"
+}

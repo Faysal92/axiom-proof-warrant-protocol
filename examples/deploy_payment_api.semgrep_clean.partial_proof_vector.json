@@ -1,0 +1,37 @@
+{
+  "meta": {
+    "proof_level": "P4_EXECUTED",
+    "source_trust": "high",
+    "freshness_epoch": 1779100000,
+    "reproducibility": "reproducible",
+    "independence": "single_source"
+  },
+  "scope": {
+    "target": "payment-api",
+    "commit": "abc123",
+    "branch": "main",
+    "environment": "production",
+    "service": "payments"
+  },
+  "dimensions": {
+    "security_scan_clean": {
+      "status": "passed",
+      "tool": "semgrep",
+      "report_ref": "semgrep_report:semgrep_clean_scan.json",
+      "blocking_findings": 0,
+      "total_findings": 0
+    }
+  },
+  "security_evidence": {
+    "scanner": "semgrep",
+    "scan_status": "passed",
+    "report_ref": "semgrep_report:semgrep_clean_scan.json",
+    "blocking_findings": 0,
+    "total_findings": 0
+  },
+  "limitations": [],
+  "contradictions": [],
+  "evidence_refs": [
+    "semgrep_report:semgrep_clean_scan.json"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "provider": "siem",
+  "kind": "threat_clearance",
+  "ref": "siem_clearance:2026-05-25:payment-api",
+  "target": "payment-api",
+  "environment": "production",
+  "commit": "abc123",
+  "claims": {
+    "security_scan_clean": {
+      "status": "passed",
+      "tool": "siem_correlation",
+      "ref": "siem_clearance:2026-05-25",
+      "blocking_findings": 0
+    }
+  },
+  "evidence_refs": ["siem_clearance:2026-05-25:payment-api"],
+  "proof_level": "P4_EXECUTED"
+}

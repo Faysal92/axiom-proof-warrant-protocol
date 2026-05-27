@@ -1,0 +1,64 @@
+{
+  "events": [
+    {
+      "event_id": "ev_finance_risk_002",
+      "source": {
+        "provider": "external_api",
+        "kind": "risk_assessment",
+        "name": "transaction-risk-api",
+        "trust_level": "high",
+        "collected_at": 1779100000
+      },
+      "subject": {
+        "action_id": "act_wire_transfer_002",
+        "target": "wire-transfer",
+        "environment": "production"
+      },
+      "claims": {
+        "fraud_score_below_threshold": false,
+        "beneficiary_verified": true
+      },
+      "evidence_refs": [
+        "risk_report_8892",
+        "kyc_check_553"
+      ],
+      "limitations": [],
+      "contradictions": [
+        {
+          "type": "fraud_risk_above_threshold",
+          "severity": "high",
+          "summary": "Fraud score exceeds policy threshold."
+        }
+      ],
+      "meta": {
+        "proof_level": "P4_EXECUTED"
+      }
+    },
+    {
+      "event_id": "ev_finance_review_002",
+      "source": {
+        "provider": "local_json",
+        "kind": "human_review",
+        "name": "finance-approval-record",
+        "trust_level": "high",
+        "collected_at": 1779100000
+      },
+      "subject": {
+        "action_id": "act_wire_transfer_002",
+        "target": "wire-transfer",
+        "environment": "production"
+      },
+      "claims": {
+        "human_reviewed": true
+      },
+      "evidence_refs": [
+        "approval_ticket_fin_43"
+      ],
+      "limitations": [],
+      "contradictions": [],
+      "meta": {
+        "proof_level": "P4_EXECUTED"
+      }
+    }
+  ]
+}

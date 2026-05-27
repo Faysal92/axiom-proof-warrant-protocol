@@ -1,0 +1,99 @@
+{
+  "jira": {
+    "tickets": [
+      {
+        "id": "CHG-1001",
+        "status": "draft",
+        "target": "prod.payment-api",
+        "environment": "production",
+        "approver": "sre-lead",
+        "updated_at_epoch": 1779881890
+      }
+    ]
+  },
+  "github": {
+    "pull_requests": [
+      {
+        "number": "42",
+        "target": "prod.payment-api",
+        "environment": "production",
+        "head_sha": "abc123",
+        "reviews": [
+          {
+            "user": "alice",
+            "state": "APPROVED"
+          },
+          {
+            "user": "bob",
+            "state": "APPROVED"
+          }
+        ],
+        "checks": [
+          {
+            "name": "unit-tests",
+            "status": "passed"
+          },
+          {
+            "name": "integration-tests",
+            "status": "passed"
+          },
+          {
+            "name": "semgrep",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "ci": {
+    "runs": [
+      {
+        "id": "run-9001",
+        "status": "passed",
+        "target": "prod.payment-api",
+        "environment": "production",
+        "checks": [
+          {
+            "name": "unit-tests",
+            "status": "passed"
+          },
+          {
+            "name": "integration-tests",
+            "status": "passed"
+          }
+        ]
+      }
+    ],
+    "security_scans": [
+      {
+        "id": "scan-9002",
+        "clean": true,
+        "target": "prod.payment-api",
+        "environment": "production",
+        "tool": "semgrep",
+        "critical_findings": 0
+      }
+    ]
+  },
+  "rollback": {
+    "plans": [
+      {
+        "id": "rb-payment-api-v1",
+        "available": true,
+        "target": "prod.payment-api",
+        "environment": "production",
+        "updated_at_epoch": 1779881890
+      }
+    ]
+  },
+  "deployment_windows": {
+    "windows": [
+      {
+        "id": "window-prod-standard",
+        "allowed": true,
+        "target": "prod.payment-api",
+        "environment": "production"
+      }
+    ]
+  }
+}

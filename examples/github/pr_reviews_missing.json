@@ -1,0 +1,7 @@
+{
+  "target": "payment-api",
+  "head_sha": "abc123",
+  "branch": "main",
+  "pr_number": 103,
+  "reviews": []
+}

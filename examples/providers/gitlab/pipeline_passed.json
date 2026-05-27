@@ -1,0 +1,11 @@
+{
+  "provider": "gitlab",
+  "gitlab_pipeline_id": "98765",
+  "target": "payment-api",
+  "commit": "sha456",
+  "branch": "main",
+  "check_runs": [
+    {"name": "unit tests", "status": "completed", "conclusion": "success", "id": "gitlab_job:111"},
+    {"name": "integration tests", "status": "completed", "conclusion": "success", "id": "gitlab_job:112"}
+  ]
+}

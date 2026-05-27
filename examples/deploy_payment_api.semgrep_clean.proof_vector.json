@@ -1,9 +1,9 @@
 {
   "meta": {
     "proof_level": "P4_EXECUTED",
-    "source_trust": "high",
+    "source_trust": "mixed",
     "freshness_epoch": 1779100000,
-    "reproducibility": "reproducible",
+    "reproducibility": "mixed",
     "independence": "multiple_sources"
   },
   "scope": {
@@ -14,32 +14,52 @@
     "service": "payments"
   },
   "dimensions": {
-    "unit_tests_passed": true,
-    "integration_tests_passed": true,
+    "unit_tests_passed": {
+      "status": "passed",
+      "tool": "github_actions",
+      "run_id": "ci-run-789",
+      "suite": "unit"
+    },
+    "integration_tests_passed": {
+      "status": "passed",
+      "tool": "github_actions",
+      "run_id": "ci-run-790",
+      "suite": "integration"
+    },
+    "rollback_available": {
+      "status": "passed",
+      "artifact": "rollback-plan-45",
+      "verified": true
+    },
+    "human_reviewed": {
+      "status": "passed",
+      "review_ref": "github-pr-review-102",
+      "reviewer_role": "maintainer"
+    },
     "security_scan_clean": {
       "status": "passed",
       "tool": "semgrep",
-      "report_ref": "semgrep_report_clean_001",
-      "critical_findings": 0,
-      "high_findings": 0
-    },
-    "rollback_available": true,
-    "human_reviewed": true
-  },
-  "security_evidence": {
-    "scanner": "semgrep",
-    "scan_status": "passed",
-    "critical_findings": 0,
-    "high_findings": 0,
-    "report_ref": "semgrep_report_clean_001"
+      "report_ref": "semgrep_report:semgrep_clean_scan.json",
+      "blocking_findings": 0,
+      "total_findings": 0
+    }
   },
   "limitations": [],
   "contradictions": [],
   "evidence_refs": [
-    "ci_unit_tests_789",
-    "ci_integration_tests_790",
-    "semgrep_report_clean_001",
-    "rollback_plan_45",
-    "review_102"
+    "github_actions:ci-run-789:unit",
+    "github_actions:ci-run-790:integration",
+    "artifact:rollback-plan-45",
+    "github:pr-review-102",
+    "semgrep_report:semgrep_clean_scan.json"
+  ],
+  "security_evidence": [
+    {
+      "scanner": "semgrep",
+      "scan_status": "passed",
+      "report_ref": "semgrep_report:semgrep_clean_scan.json",
+      "blocking_findings": 0,
+      "total_findings": 0
+    }
   ]
 }

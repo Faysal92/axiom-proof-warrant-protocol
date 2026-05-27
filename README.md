@@ -1,220 +1,339 @@
 # AXIOM
 
-**Status:** Draft v0.1.2 / RFC Candidate  
-**Category:** Proof-Weighted Authorization / Proof Warrant Protocol  
+**Status:** Draft v0.1.6 / RFC Candidate  
+**Category:** Proof-of-Action Layer / Proof Warrant Protocol  
 **Primary Artifact:** Execution Warrant  
-**Core Doctrine:** No action beyond proportional proof.
+**Core Doctrine:** No action beyond proportional proof.  
+**Reference Kernel:** Deterministic Python implementation with Source Verifiers MVP  
 
-> AXIOM is a proof-warrant protocol and deterministic reference kernel for critical AI actions.
+> **AXIOM is a provider-agnostic Proof-of-Action Layer for critical autonomous actions.**
 
 ```text
-Permission is not proof.
-Proof must be proportional to consequence.
-No action beyond proportional proof.
+No proof, no warrant.
+No warrant, no critical action.
 ```
 
-AXIOM exists because AI is moving from **answering** to **acting**.
+AXIOM exists because AI systems are moving from **answering** to **acting**.
 
 When AI only answers, the main problem is correctness.  
 When AI acts, the main problem is justification.
 
-A critical AI action should not execute merely because an agent has permission.  
+A critical autonomous action should not execute merely because an agent is authenticated, authorized, aligned, sandboxed, or running on trusted infrastructure.
+
 It should execute only when the available proof is proportional to the consequence of the action.
 
 ---
 
-## 1. The Cybersecurity Blind Spot
+## 0. v0.1.6 Product Architecture: Source-Verified Governance
 
-Modern cybersecurity controls access.
-
-AXIOM controls justified execution.
-
-Traditional security systems ask:
+AXIOM v0.1.6 locks the product foundation around one rule:
 
 ```text
-Who is acting?
-Does this actor have permission?
-Does the action satisfy policy?
-Does the behavior look suspicious?
+AXIOM does not trust the agent.
+AXIOM verifies at the source, governs by policy, signs the warrant, and records the decision.
 ```
 
-Those questions are necessary, but not sufficient.
-
-An AI agent can be authenticated, authorized, policy-compliant, inside the perimeter, and apparently normal — and still execute a dangerous action based on hallucinated reasoning, stale evidence, prompt injection, incomplete tests, misread context, missing rollback, false correlation, or contradictory logs.
-
-The next cyber failure mode is not only unauthorized action.
-
-It is:
+The product architecture is intentionally hybrid:
 
 ```text
-authorized action without sufficient justification
+Raw Enterprise Context
+        ↓
+Normalizer
+        ↓
+Pydantic Schemas
+        ↓
+Source Verifiers
+        ↓
+Policy Kernel
+        ↓
+Execution Warrant
+        ↓
+Proof Ledger
 ```
 
-AXIOM adds the missing runtime question:
+The normalizer may use AI to extract intent from messy enterprise context.
+
+The critical path does not rely on AI judgment. Source Verifiers check evidence at the source: tickets, reviews, CI runs, security scans, rollback plans, deployment windows, IAM, SIEM, cloud metadata, or business systems.
 
 ```text
-Is this action sufficiently justified by proof, in this context, right now?
+The normalizer extracts intent.
+Schemas structure it.
+Verifiers check evidence at the source.
+The policy kernel decides.
+The warrant signs.
+The ledger remembers.
+```
+
+### Why Source Verifiers Matter
+
+A valid schema is not the same as a true claim.
+
+An agent can produce a structurally valid object saying:
+
+```json
+{
+  "ticket_id": "CHG-1001",
+  "approval": "approved",
+  "rollback_plan": "available"
+}
+```
+
+Pydantic can validate the shape. It cannot prove the ticket exists, that the approval is real, that the approver is authorized, or that the rollback plan is fresh and scoped to the requested action.
+
+AXIOM v0.1.6 introduces source verification for this reason:
+
+```text
+Pydantic structures. AXIOM verifies.
+```
+
+### Source-Verified DevOps MVP
+
+The reference MVP demonstrates a production deployment action:
+
+```text
+agent_ops_01 wants to deploy prod.payment-api
+```
+
+AXIOM verifies these claims at source before issuing a warrant:
+
+```text
+change ticket approved
+GitHub PR approved
+CI checks passed
+security scan clean
+rollback plan available
+deployment window allowed
+```
+
+Run it locally:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli verify-action \
+  --action-request examples/devops/deploy_to_production.action_request.json \
+  --sources examples/devops/sources_allow.json \
+  --policy examples/devops/devops_prod_policy.yml \
+  --out examples/devops/output.allow.warrant.json \
+  --proof-out examples/devops/output.allow.proof_vector.json \
+  --verified-out examples/devops/output.allow.verified_evidence.json \
+  --ledger data/devops_ledger.jsonl
+```
+
+Expected result:
+
+```text
+Decision: ALLOW
+Verified claims: 6
+```
+
+Try missing rollback:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli verify-action \
+  --action-request examples/devops/deploy_to_production.action_request.json \
+  --sources examples/devops/sources_missing_rollback.json \
+  --policy examples/devops/devops_prod_policy.yml \
+  --out examples/devops/output.suspend.warrant.json
+```
+
+Expected result:
+
+```text
+Decision: SUSPEND
+Missing evidence:
+- rollback_available
+```
+
+Try failed security scan:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli verify-action \
+  --action-request examples/devops/deploy_to_production.action_request.json \
+  --sources examples/devops/sources_failed_security.json \
+  --policy examples/devops/devops_prod_policy.yml \
+  --out examples/devops/output.block.warrant.json
+```
+
+Expected result:
+
+```text
+Decision: BLOCK
+Missing evidence:
+- contradiction:security_scan_failure
+```
+
+The same flow is also exposed through HTTP:
+
+```text
+POST /v1/actions/evaluate
+```
+
+
+## 1. The Final Thesis
+
+AXIOM is built around one simple claim:
+
+```text
+Permission is not proof.
+Confidence is not proof.
+A valid identity is not proof.
+A safe runtime is not proof.
+A clean log is not proof by itself.
+
+Critical action requires proportional proof.
+```
+
+AXIOM turns autonomous execution into a governed, auditable, proof-based process:
+
+```text
+Evidence → Governance → Warrant → Execution → Ledger
+```
+
+A system governed by AXIOM does not ask only:
+
+```text
+Can this agent act?
+```
+
+It asks:
+
+```text
+Has this action earned the right to be executed?
+```
+
+---
+
+## 2. Why AXIOM Exists
+
+NVIDIA strengthens trust in the execution infrastructure.
+
+OpenAI and Anthropic strengthen the safety of agents and their runtimes.
+
+Traditional cybersecurity strengthens access control, identity, posture, and policy.
+
+AXIOM adds the missing layer:
+
+```text
+Proof of Action
+```
+
+A critical autonomous action should not only be:
+
+```text
+technically possible
+identity-authorized
+policy-permitted
+runtime-guarded
+executed in an attested environment
+```
+
+It must also be:
+
+```text
+justified by proportional evidence
+bound to a specific context
+scoped to a specific target
+fresh enough to be valid
+free from blocking contradictions
+recorded as an Execution Warrant
+written into a Proof Ledger
 ```
 
 Short version:
 
-```text
-A stolen key should not be enough.
-A valid role should not be enough.
-A policy match should not be enough.
-A confident agent should not be enough.
-```
-
-AXIOM requires a warrant.
+> **The others strengthen the capacity to act. AXIOM governs the right to act.**
 
 ---
 
-## 2. What AXIOM Does
+## 3. Ecosystem Map
 
-AXIOM turns static permission into proof-weighted authorization.
+AXIOM does not replace the major layers of the AI and cybersecurity stack.
 
-```text
-Identity + Permission + Policy
-→ Access
+It gives them a common proof-of-action layer.
 
-Identity + Permission + Policy + Contextual Proof + Action Weight + Scope + Time + Accountability
-→ Execution Warrant
-```
+| Layer | Examples | What it secures | What remains missing |
+|---|---|---|---|
+| Infrastructure | NVIDIA, cloud, confidential computing, attestation | Execution environment | Whether a specific action is justified |
+| Model/runtime | OpenAI, Anthropic, agent SDKs, guardrails, hooks, sandboxing | Agent behavior and tool use inside a runtime | Portable, provider-agnostic warrant of action |
+| Cybersecurity | IAM, Zero Trust, SIEM, EDR, scanners, policy engines | Identity, posture, access, detection | Proof that an autonomous action is proportionally justified |
+| AXIOM | ProofVector, RequirementVector, Execution Warrant, Proof Ledger | The act itself | The external systems still provide evidence |
 
-AXIOM does not replace IAM, Zero Trust, EDR, SIEM, SOAR, CI/CD, runtime governance, or vulnerability scanners.
+AXIOM's role is not to be another model, scanner, SIEM, IAM system, or runtime.
 
-AXIOM adds the missing artifact those systems should require before critical execution:
-
-```text
-Execution Warrant
-```
-
-An Execution Warrant records who requested the action, what action was requested, what proof was provided, what proof was required, what proof was missing, what scope was authorized, what risk was accepted, and why the action was allowed, suspended, or blocked.
-
----
-
-## 3. Assessment Layer vs Decision Layer vs Execution Layer
-
-AXIOM is not a scanner.
-
-Scanners and security tools detect or assess risk. AXIOM decides whether execution is justified.
+AXIOM's role is to answer the missing question:
 
 ```text
-Assessment Layer → Snyk / Semgrep / SonarQube / Wiz / SIEM / EDR / CNAPP
-Decision Layer   → AXIOM
-Execution Layer  → CI/CD / agents / scripts / cloud APIs
-```
-
-The key distinction:
-
-```text
-Scanners detect risk.
-AXIOM governs the right to act.
-```
-
-A scanner may produce:
-
-```json
-{
-  "tool": "semgrep",
-  "scan_status": "failed",
-  "critical_findings": 1,
-  "report_ref": "semgrep_report_001"
-}
-```
-
-AXIOM consumes that evidence inside a `ProofVector`, checks it against policy, and emits a decision:
-
-```text
-ALLOW
-SUSPEND
-BLOCK
-REQUIRE_HUMAN_REVIEW
-CONDITIONAL
-```
-
-AXIOM does not try to find every vulnerability.
-
-AXIOM ensures that critical actions cannot be properly authorized when the required security evidence is missing, stale, contradictory, or failed.
-
-Precise cyber claim:
-
-```text
-AXIOM does not make attacks impossible.
-AXIOM makes unjustified critical actions impossible to authorize properly when execution is warrant-gated.
-```
-
-
----
-
-## Scanner Evidence Example — v0.1.2
-
-v0.1.2 adds a concrete scanner-evidence demonstration.
-
-The goal is to prove that AXIOM is the **Decision Layer**, not the Assessment Layer.
-
-```text
-Semgrep / Snyk / Wiz / SIEM / EDR → produce evidence
-AXIOM → consumes evidence and emits a warrant decision
-CI/CD / agents / cloud APIs → execute only with a valid warrant
-```
-
-Three scanner-driven outcomes are included:
-
-| Scenario | Scanner Evidence | AXIOM Decision |
-|---|---|---|
-| Clean scan + required proof | `security_scan_clean: true` | `ALLOW` |
-| Missing scan evidence | no `security_scan_clean` dimension | `SUSPEND` |
-| Failed Semgrep scan | `security_scan_clean: false` + contradiction | `BLOCK` |
-
-Example failed scanner evidence:
-
-```json
-{
-  "tool": "semgrep",
-  "scan_status": "failed",
-  "critical_findings": 1,
-  "high_findings": 2,
-  "report_ref": "semgrep_report_001"
-}
-```
-
-AXIOM does not rerun Semgrep.
-
-AXIOM consumes the scanner result as proof and decides whether the deployment is justified.
-
-```text
-Scanners detect risk.
-AXIOM governs the right to act.
+Is this specific action sufficiently justified by proof, in this context, right now?
 ```
 
 ---
 
-## 4. The Core Idea
+## 4. The Shadow Agent Sprawl Problem
 
-AXIOM is based on one rule:
+Enterprises are moving from AI pilots to autonomous agents.
+
+The problem is not only that agents may be unsafe.
+
+The deeper problem is that agents can proliferate faster than security, platform, compliance, and audit teams can inventory, govern, and verify their actions.
+
+This creates a new enterprise risk:
 
 ```text
-Action Weight ≤ Proof Coverage
+I have agents, but I cannot prove they are under control
+or credible in their actions.
 ```
 
-A passing unit test is not enough for a production payment deployment.  
-A valid service account is not enough to delete critical data.  
-A confident agent is not enough to trigger a cyber-response action.  
-A policy match is not enough if the action is based on weak or stale evidence.
+AXIOM addresses this with a proof-warrant model:
 
-AXIOM checks whether the proof is proportional to the consequence.
+```text
+Every critical action must carry proof.
+Every decision must produce a warrant.
+Every warrant must be auditable.
+Every missing proof becomes explicit.
+```
+
+AXIOM does not claim to discover every agent automatically.
+
+AXIOM provides the protocol and reference kernel for making critical autonomous actions warrant-gated, controllable, credible, and auditable.
 
 ---
 
-## 5. AXIOM Doctrine
+## 5. The Core Law
+
+```text
+No action beyond proportional proof.
+```
+
+This means:
+
+```text
+The more consequential the action,
+the stronger, fresher, broader, and more auditable the proof must be.
+```
+
+A unit test may be enough for a local refactor.
+
+It is not enough for a production payment deployment.
+
+A risk score may be enough for a low-value refund.
+
+It is not enough for a high-value wire transfer.
+
+A single sensor may be enough for a harmless robotic movement.
+
+It is not enough for a human-adjacent industrial action.
+
+The action weight determines the proof required.
+
+---
+
+## 6. AXIOM Doctrine
 
 AXIOM is governed by seven invariants:
 
 ```text
 1. Permission is not proof.
 2. Proof must be proportional to consequence.
-3. Proof is a vector, not a score.
+3. Proof is a vector, not a scalar score.
 4. No critical action without an Execution Warrant.
 5. No evidence without provenance.
 6. No warrant beyond context.
@@ -223,159 +342,254 @@ AXIOM is governed by seven invariants:
 
 The model may propose.
 
+The agent may collect.
+
+The runtime may execute.
+
+The infrastructure may attest.
+
 The warrant decides.
 
 ---
 
-## 6. Product Category
+## 7. What AXIOM Is
 
-AXIOM defines a category:
-
-```text
-Proof-Weighted Authorization
-```
-
-Also expressible as:
+AXIOM is:
 
 ```text
-Proof-Conditioned Authorization
-Proof-Bounded Control
-Proof Warrant Protocol
-Epistemic Zero Trust
+a Proof-of-Action Layer
+a Proof Warrant Protocol
+a deterministic reference kernel
+a provider-agnostic evidence layer
+a warrant gate for critical autonomous actions
+an auditable Proof Ledger
+a future dataset engine for proof-native agents
 ```
 
-| Layer | Question |
-|---|---|
-| Identity | Who is acting? |
-| Permission | Is this actor allowed in principle? |
-| Policy | Is this action compliant with rules? |
-| Runtime Governance | Should this tool call or resource access proceed? |
-| **AXIOM** | **Is the proof strong enough for the consequence of this action?** |
+AXIOM is not:
 
-AXIOM does not compete with identity and policy systems.
+```text
+a scanner
+a SIEM
+an IAM system
+a model provider
+a cloud provider
+an agent builder
+a generic observability platform
+a replacement for OpenAI, Anthropic, NVIDIA, GitHub, GitLab, or Zero Trust
+```
 
-AXIOM provides the proof object they should consume.
+AXIOM consumes signals from those systems.
+
+It does not replace them.
 
 ---
 
-## 7. AXIOM Is Multidimensional
+## 8. Proof-of-Action Layer
 
-AXIOM is multidimensional, but not scattered.
-
-It has one core:
+AXIOM defines a new architectural category:
 
 ```text
-No action beyond proportional proof.
+Proof-of-Action Layer
 ```
 
-Every use case comes from this single rule.
-
-AXIOM can be viewed through seven dimensions:
-
-1. **Cybersecurity** — scanners detect risk; AXIOM governs the right to act.
-2. **DevSecOps / CI/CD** — AXIOM gates merge, deploy, rollback and infrastructure changes.
-3. **AI Governance** — AXIOM turns AI actions into auditable decisions.
-4. **Agent Intelligence** — AXIOM transforms a model that answers well into an agent that knows when it has earned the right to act.
-5. **Proof-Labeled Dataset** — every warrant decision becomes training and evaluation data.
-6. **Protocol / Standard** — Execution Warrant, ProofVector, RequirementVector and Proof Ledger form a vendor-neutral language for proving before acting.
-7. **Business Infrastructure** — Warrant Gate, Code Gate, Cyber Response Gate, enterprise connectors, compliance reports and Proof Ledger analytics.
-
-Strategic formula:
+A Proof-of-Action Layer sits between evidence sources and execution points.
 
 ```text
-The Warrant is the product.
-The Proof Ledger is the moat.
-RLPF is the expansion.
+Evidence Sources
+  → Canonical Evidence Events
+  → Proof Router
+  → ProofVector
+  → AXIOM Kernel
+  → Execution Warrant
+  → Enforcement Point
+  → Proof Ledger
 ```
 
-Final multidimensional thesis:
+Its purpose is to make critical action:
 
 ```text
-AXIOM is proof infrastructure for autonomous execution.
-It secures actions, governs agents, produces auditable decisions,
-and generates the datasets that can make future models more intelligent.
+controllable
+credible
+auditable
+explainable
+interoperable
+governable
 ```
 
-Where Scale AI industrialized labeled data for perception, AXIOM industrializes proof-labeled decisions for action.
+The minimal operating rule:
+
+```text
+No proof, no warrant.
+No warrant, no critical action.
+```
 
 ---
 
-## 8. Core Artifacts
+## 9. Architecture
+
+```text
+                 ┌────────────────────────────┐
+                 │     Evidence Sources       │
+                 │                            │
+                 │ GitHub / GitLab / CI/CD    │
+                 │ Semgrep / Snyk / scanners  │
+                 │ SIEM / EDR / SOC           │
+                 │ Business APIs              │
+                 │ Human approvals            │
+                 │ Local JSON / webhooks      │
+                 │ Sensors / runtime events   │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │ Canonical Evidence Events  │
+                 │ provider-agnostic evidence │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │        Proof Router        │
+                 │ merges partial evidence    │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │        ProofVector         │
+                 │ what proof supports        │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │      AXIOM Kernel          │
+                 │ deterministic decision     │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │    Execution Warrant       │
+                 │ signed decision artifact   │
+                 └──────────────┬─────────────┘
+                                │
+                                ▼
+                 ┌────────────────────────────┐
+                 │       Proof Ledger         │
+                 │ audit + learning memory    │
+                 └────────────────────────────┘
+```
+
+---
+
+## 10. Core Artifacts
 
 | Artifact | Role |
 |---|---|
-| `Claim` | Assertion produced by a model, agent, or machine process |
-| `Proof License` | Boundary of what a claim is allowed to justify |
-| `Action Weight` | Consequence weight of the proposed action |
-| `ProofVector` | What the available evidence actually supports |
-| `RequirementVector` | What proof the action requires |
+| `Action` | The proposed operation to execute |
+| `Action Weight` | Consequence and risk weight of the action |
+| `Canonical Evidence Event` | Provider-agnostic evidence input |
+| `ProofVector` | What the available evidence supports |
+| `RequirementVector` | What the action requires before execution |
 | `Execution Warrant` | Signed, scoped, time-bound decision artifact |
 | `Proof Ledger` | Append-only memory of warrant decisions |
 
-### Note on Action Weight
-
-Action Weight is a governance parameter, not a scientific measurement.
-
-It represents the organization’s risk appetite for a given class of actions and must be defined, versioned, reviewed, and audited by the organization’s security governance function.
-
-AXIOM does not claim to discover the “true” risk of an action automatically. It provides a deterministic mechanism for applying a documented risk policy to execution decisions.
-
 ---
 
-## 9. Execution Warrant Example
+## 11. Canonical Evidence Event
+
+AXIOM v0.1.6 is evidence-first and source-verified.
+
+GitHub, GitLab, Jenkins, Semgrep, SIEM, EDR, business systems, local JSON, webhooks, and human approvals are all evidence sources.
+
+AXIOM evaluates only canonical proof.
+
+Example:
 
 ```json
 {
-  "warrant_id": "wrn_000001",
-  "protocol_version": "axiom-proof-warrant-v0.1.2",
-  "warrant_type": "EXECUTION_WARRANT",
-  "status": "SUSPENDED",
-  "actor": {
-    "actor_id": "ai_coding_agent_01",
-    "actor_type": "ai_agent",
-    "identity_verified": true
+  "event_id": "ev_security_scan_001",
+  "source": {
+    "provider": "semgrep",
+    "kind": "security_scan",
+    "name": "semgrep",
+    "trust_level": "high",
+    "collected_at": 1779100000
   },
-  "action": {
-    "action_type": "deploy_production",
+  "subject": {
+    "action_id": "act_deploy_payment_api",
     "target": "payment-api",
     "environment": "production"
   },
-  "required_proof": {
-    "min_proof_level": "P4_EXECUTED",
-    "required_evidence": [
-      "unit_tests_passed",
-      "integration_tests_passed",
-      "security_scan_clean",
-      "rollback_plan_verified",
-      "human_reviewed"
-    ]
+  "claims": {
+    "security_scan_clean": false
   },
-  "provided_proof": {
-    "proof_level": "P2_SOURCE_BACKED",
-    "evidence_refs": [
-      "git_diff_abc123",
-      "ci_unit_tests_789"
-    ]
-  },
-  "missing_evidence": [
-    "integration_tests_passed",
-    "security_scan_clean",
-    "rollback_plan_verified",
-    "human_reviewed"
+  "evidence_refs": [
+    "semgrep_report_001"
   ],
-  "decision": "SUSPEND",
-  "reason": "Provided proof is not proportional to the consequence of deploying payment-api to production.",
-  "challenge": {
-    "resubmit_allowed": true,
-    "next_actions": [
-      "Run integration tests and attach the test logs.",
-      "Run a security scan and attach the scan result.",
-      "Provide and verify a rollback plan.",
-      "Request human review and attach approval evidence."
-    ]
-  }
+  "limitations": [],
+  "contradictions": [
+    {
+      "type": "security_scan_failure",
+      "severity": "critical",
+      "summary": "Critical finding detected."
+    }
+  ]
 }
 ```
+
+The same schema can represent:
+
+```text
+CI results
+security scans
+human approvals
+rollback plans
+fraud risk checks
+SOC clearance
+business approvals
+runtime attestations
+external API responses
+```
+
+That is what makes AXIOM provider-agnostic.
+
+---
+
+## 12. Proof Hygiene
+
+AXIOM follows a strict proof-hygiene rule:
+
+```text
+An evidence source may only claim what it actually observed.
+```
+
+Examples:
+
+| Evidence source | May claim | Must not claim |
+|---|---|---|
+| Semgrep | `security_scan_clean` | `human_reviewed`, `rollback_available` |
+| GitHub Checks / GitLab CI | `unit_tests_passed`, `integration_tests_passed` | `security_scan_clean`, `human_reviewed` |
+| PR/MR review system | `human_reviewed` | `unit_tests_passed`, `rollback_available` |
+| Rollback plan artifact | `rollback_available` | `security_scan_clean`, `human_reviewed` |
+| Fraud risk API | `fraud_score_below_threshold` | `manager_approved` |
+| Human approval system | `human_approved` | `fraud_score_below_threshold` |
+
+AXIOM loses value if connectors invent proof.
+
+Proof must be observed, sourced, scoped, fresh, and auditable.
+
+---
+
+## 13. Decision Model
+
+AXIOM emits one of five decisions:
+
+| Decision | Meaning |
+|---|---|
+| `ALLOW` | Proof covers requirements and the warrant is issued |
+| `CONDITIONAL` | Execution allowed only under explicit constraints |
+| `SUSPEND` | Missing proof can potentially be supplied |
+| `REQUIRE_HUMAN_REVIEW` | Automated proof is insufficient for action weight |
+| `BLOCK` | Contradiction, forbidden action, hard risk limit, invalid proof, or forged evidence |
 
 The UX is not:
 
@@ -389,51 +603,15 @@ It is:
 Not yet. Here is the proof gap.
 ```
 
----
+Suspended and blocked warrants are not waste.
 
-## 10. Decisions
-
-AXIOM emits one of five decisions.
-
-| Decision | Meaning |
-|---|---|
-| `ALLOW` | Proof covers requirements and warrant is issued |
-| `CONDITIONAL` | Execution allowed only under explicit constraints |
-| `SUSPEND` | Missing proof can potentially be supplied |
-| `REQUIRE_HUMAN_REVIEW` | Automated proof is insufficient for action weight |
-| `BLOCK` | Contradiction, forbidden action, hard risk limit, invalid proof, or forged evidence |
-
-Suspended or blocked warrants are not waste.
-
-They are learning signals.
+They are structured learning signals.
 
 ---
 
-## 11. Proof Levels
+## 14. Deterministic Kernel
 
-Proof levels are useful, but never sufficient alone.
-
-They must always be combined with scope, context, freshness, limitations, contradictions, validity window, and risk bound.
-
-| Level | Name | Meaning |
-|---|---|---|
-| `P0` | Unsupported | Model assertion only; no external evidence |
-| `P1` | Plausible | Coherent hypothesis, but unverified |
-| `P2` | Source-backed | Static evidence: document, diff, isolated log, single artifact |
-| `P3` | Cross-checked | Multiple independent sources or empirical corroboration |
-| `P4` | Executed | Verified through test, benchmark, query, simulation, or formal check under assumptions |
-| `P5` | Audited | Executed and reviewed by human, trusted authority, formal process, or third party |
-
-```text
-P4 is not universal.
-Executed proof is only valid within its assumptions, scope, and test conditions.
-```
-
----
-
-## 12. Deterministic Kernel
-
-AXIOM does not authorize by scalar confidence.
+AXIOM does not authorize by model confidence.
 
 It authorizes through deterministic constraints:
 
@@ -442,9 +620,9 @@ Allowed(action) ⇔
 
 ProofVector ⊒ RequirementVector
 
-AND Scope(action) ⊆ Scope(ProofLicense)
+AND Scope(action) ⊆ Scope(Proof)
 
-AND Time(action) ⊆ ValidityWindow(ProofLicense)
+AND Time(action) ⊆ ValidityWindow(Proof)
 
 AND Risk(action, context) ≤ PolicyRiskBound(action, context)
 
@@ -459,40 +637,411 @@ AND Warrant is not expired
 AND Warrant is not revoked
 ```
 
-An LLM may assist in:
+An LLM may help with:
 
 ```text
 claim extraction
 evidence summarization
-missing evidence suggestion
-explanation generation
-proof-vector drafting
+proof gap explanation
+next-action suggestions
+ProofVector drafting
 ```
 
 An LLM must not be the final authorization authority.
 
 ```text
-The model may propose.
-The warrant decides.
+The model may become proof-native,
+but the warrant remains external.
 ```
 
 ---
 
-## 13. AXIOM and Model Intelligence
+## 15. Action Weight
+
+`Action Weight` is a governance parameter, not a scientific measurement.
+
+It represents an organization's risk appetite for a class of actions.
+
+It must be:
+
+```text
+defined
+versioned
+reviewed
+audited
+owned by security / governance leadership
+```
+
+AXIOM does not claim to discover the true risk of an action automatically.
+
+AXIOM provides a deterministic mechanism for applying a documented risk policy to execution decisions.
+
+---
+
+## 16. Proof Levels
+
+Proof levels are useful, but never sufficient alone.
+
+They must always be combined with:
+
+```text
+scope
+context
+freshness
+limitations
+contradictions
+validity window
+risk bound
+```
+
+| Level | Name | Meaning |
+|---|---|---|
+| `P0` | Unsupported | Model assertion only; no external evidence |
+| `P1` | Plausible | Coherent hypothesis, but unverified |
+| `P2` | Source-backed | Static evidence: document, diff, isolated log, single artifact |
+| `P3` | Cross-checked | Multiple independent sources or empirical corroboration |
+| `P4` | Executed | Verified through test, benchmark, query, simulation, or formal check under assumptions |
+| `P5` | Audited | Executed and reviewed by human, trusted process, formal authority, or third party |
+
+```text
+P4 is not universal.
+Executed proof is only valid within its assumptions, scope, and test conditions.
+```
+
+---
+
+## 17. Execution Warrant
+
+An `Execution Warrant` is the central AXIOM artifact.
+
+It records:
+
+```text
+who requested the action
+what action was requested
+what proof was provided
+what proof was required
+what proof was missing
+what scope was authorized
+what risk was accepted or rejected
+why the action was allowed, suspended, or blocked
+when the decision was made
+how the warrant was signed
+where the decision was recorded
+```
+
+Example:
+
+```json
+{
+  "warrant_id": "wrn_000001",
+  "warrant_type": "EXECUTION_WARRANT",
+  "status": "SUSPENDED",
+  "actor": {
+    "actor_id": "ai_coding_agent_01",
+    "actor_type": "ai_agent",
+    "identity_verified": true
+  },
+  "action": {
+    "action_type": "deploy_production",
+    "target": "payment-api",
+    "environment": "production"
+  },
+  "provided_proof": {
+    "proof_level": "P2_SOURCE_BACKED",
+    "evidence_refs": [
+      "git_diff_abc123",
+      "ci_unit_tests_789"
+    ]
+  },
+  "missing_evidence": [
+    "integration_tests_passed",
+    "security_scan_clean",
+    "rollback_available",
+    "human_reviewed"
+  ],
+  "decision": "SUSPEND",
+  "reason": "Provided proof is not proportional to the consequence of deploying payment-api to production."
+}
+```
+
+---
+
+## 18. Proof Ledger
+
+The Proof Ledger is the append-only memory of AXIOM decisions.
+
+In v0.1.5, the reference implementation uses a local JSONL hash chain for simplicity and transparency.
+
+At enterprise scale, ledger design raises first-class concerns:
+
+```text
+integrity
+distribution
+privacy
+retention
+interoperability
+revocation
+external verification
+tenant boundaries
+compliance export
+```
+
+The local ledger is the reference starting point, not the final enterprise architecture.
+
+Strategic view:
+
+```text
+The warrant is the product.
+The Proof Ledger is the moat.
+RLPF is the expansion.
+```
+
+The format of a warrant can be copied.
+
+A history of real proof decisions cannot be copied.
+
+Every `SUSPEND`, `BLOCK`, and `ALLOW` becomes structured proof feedback.
+
+---
+
+## 19. AXIOM and Cybersecurity
+
+AXIOM is cybersecurity because it protects execution.
+
+Traditional cybersecurity asks:
+
+```text
+Who is acting?
+Is this identity valid?
+Is the device posture acceptable?
+Is the access allowed?
+Is the behavior suspicious?
+```
+
+AXIOM adds:
+
+```text
+Is this action justified by proportional proof?
+```
+
+This is not a replacement for IAM, Zero Trust, EDR, SIEM, SOAR, scanners, or policy engines.
+
+It is a missing decision artifact those systems can feed:
+
+```text
+identity signals
+policy signals
+scan results
+logs
+alerts
+attestation
+approvals
+test results
+risk scores
+```
+
+AXIOM converts those signals into:
+
+```text
+ALLOW / SUSPEND / BLOCK
+Execution Warrant
+Proof Ledger entry
+```
+
+Precise cyber claim:
+
+```text
+AXIOM does not make attacks impossible.
+AXIOM makes unjustified critical actions impossible to authorize properly
+when execution is warrant-gated.
+```
+
+---
+
+## 20. AXIOM vs Scanners
+
+AXIOM is not a scanner.
+
+Scanners detect or assess risk.
+
+AXIOM governs whether execution is justified in light of that risk.
+
+```text
+Assessment Layer → Semgrep / Snyk / Wiz / SIEM / EDR / CNAPP
+Decision Layer   → AXIOM
+Execution Layer  → CI/CD / agents / scripts / cloud APIs
+```
+
+Short version:
+
+```text
+Scanners detect risk.
+AXIOM governs the right to act.
+```
+
+If Semgrep reports a critical finding and an agent still requests a production deployment, AXIOM can issue:
+
+```text
+BLOCK
+```
+
+If the scanner evidence is missing, AXIOM can issue:
+
+```text
+SUSPEND
+```
+
+If the evidence covers the requirement vector, AXIOM can issue:
+
+```text
+ALLOW
+```
+
+---
+
+## 21. AXIOM and OpenAI, Anthropic, NVIDIA
+
+AXIOM is complementary to major AI infrastructure providers.
+
+| Actor | Strength | AXIOM adds |
+|---|---|---|
+| OpenAI | Agent runtime, orchestration, tools, guardrails, sandboxing, tracing | External proof-of-action warrant and ledger |
+| Anthropic | Claude Code hooks, agent safety, deterministic control points, MCP ecosystem | Provider-agnostic warrant protocol beyond one runtime |
+| NVIDIA | Accelerated infrastructure, guardrails, attestation, confidential computing | Decision of whether the action itself is justified |
+| Traditional Cyber | Identity, posture, access, policy, detection | Portable proof that a specific autonomous action was justified |
+
+Important distinction:
+
+```text
+MCP validates the need for open agent-tool interoperability.
+Claude Code Hooks validate the need for deterministic pre-action control.
+AXIOM targets the missing neutral layer:
+proof of action before critical execution.
+```
+
+AXIOM does not compete with these layers.
+
+AXIOM gives them a common warrant language.
+
+---
+
+## 22. Anthropic Hooks and AXIOM
+
+Claude Code Hooks are a strong validation of AXIOM's thesis.
+
+They show that deterministic control before tool use is necessary.
+
+But a hook is not the same thing as a provider-agnostic warrant protocol.
+
+```text
+Claude Code Hook:
+Before using a tool, run a configured control.
+If the hook denies, block the tool call.
+
+AXIOM:
+Before a critical action, gather multi-source evidence.
+Compare ProofVector and RequirementVector.
+Check scope, freshness, limitations, contradictions, and action weight.
+Emit ALLOW / SUSPEND / BLOCK.
+Produce a signed Execution Warrant.
+Record the decision in a Proof Ledger.
+```
+
+Best integration:
+
+```text
+Claude Code → PreToolUse Hook → AXIOM → Warrant → Allow/Block
+```
+
+But this is an integration, not a dependency.
+
+AXIOM must remain independent of any single runtime.
+
+```text
+Hooks are enforcement points.
+AXIOM is the proof-of-action protocol.
+```
+
+---
+
+## 23. MCP, Hooks, and AXIOM
+
+MCP and Claude Code Hooks should not be confused.
+
+```text
+MCP expands what an agent can connect to.
+Hooks constrain how an agent acts.
+AXIOM proves whether a critical action has earned the right to execute.
+```
+
+MCP validates the need for open agent-tool interoperability.
+
+Hooks validate the need for deterministic action control.
+
+AXIOM combines these market signals into a neutral Proof-of-Action Layer:
+
+```text
+not another tool protocol
+not another hook system
+not another model guardrail
+
+a portable warrant format,
+canonical proof schema,
+and ledger for critical autonomous actions.
+```
+
+---
+
+## 24. AXIOM and Scale AI
+
+The comparison with Scale AI is strategic, not literal.
+
+Scale AI helped industrialize labeled data for model learning.
+
+AXIOM aims to industrialize proof-labeled decisions for autonomous action.
+
+```text
+Model era:
+raw data → labels → training datasets
+
+Agent era:
+proposed action → required proof → warrant decision → Proof Ledger
+```
+
+Short version:
+
+```text
+The model era needed labels to learn.
+The agent era will need warrants to act.
+```
+
+Even sharper:
+
+```text
+Scale AI helped enterprises turn raw data into trainable models.
+AXIOM helps enterprises turn uncontrolled agents into controlled,
+credible, warrant-gated systems.
+```
+
+---
+
+## 25. AXIOM and Model Intelligence
 
 AXIOM does not magically make a model know more facts.
 
-It improves a different and more operational form of intelligence.
+It improves a different and more operational form of intelligence:
 
 ```text
-1. Knowledge intelligence
-   What the model knows.
+Knowledge intelligence:
+what the model knows.
 
-2. Action intelligence
-   What the model knows how to do with what it knows.
+Action intelligence:
+what the model knows how to do with what it knows.
 
-3. Epistemic intelligence
-   What the model knows about the quality, limits, and proof status of its own knowledge.
+Epistemic intelligence:
+what the model knows about the quality, limits, and proof status
+of its own claims before acting.
 ```
 
 AXIOM immediately improves action intelligence and epistemic intelligence.
@@ -518,50 +1067,31 @@ That is not ignorance.
 
 That is intelligent treatment of ignorance.
 
-AXIOM transforms a model that answers well into an agent that knows when it has earned the right to act.
-
-```text
-Short term:
-AXIOM teaches the system to measure its ignorance.
-
-Long term:
-AXIOM teaches the model to reduce critical ignorance through proof feedback.
-```
-
 ---
 
-## 14. Black-Box and White-Box Models
+## 26. Black-Box and White-Box Models
 
-AXIOM can improve both black-box and white-box models, but differently.
+AXIOM can improve both black-box and white-box agents, but differently.
 
 ### Black-box models
 
-For black-box models, AXIOM does not change the weights.
+For black-box models, AXIOM does not change weights.
 
 It improves behavior through:
 
 ```text
-prompting
-tool feedback
+external feedback
+proof gaps
 challenge responses
-agent memory
 RAG over previous warrants
+tool-use constraints
 few-shot proof examples
-guarded tool calls
-```
-
-Black-box formula:
-
-```text
-AXIOM does not change the weights.
-AXIOM changes the decision loop.
+runtime decision loops
 ```
 
 ### White-box models
 
-For white-box or open-weight models, AXIOM can improve the model more deeply.
-
-The Proof Ledger can support:
+For open-weight or internal models, AXIOM can support deeper learning:
 
 ```text
 fine-tuning
@@ -569,39 +1099,26 @@ instruction tuning
 DPO
 reward modeling
 RLPF
-evaluation benchmarks
 proof-native adapters
+evaluation benchmarks
 ```
 
-White-box formula:
+Final formula:
 
 ```text
-AXIOM can turn proof feedback into model training.
-```
-
-Final model-improvement thesis:
-
-```text
-Black-box: AXIOM improves behavior through external proof feedback.
-White-box: AXIOM can improve weights through proof-labeled datasets.
+Black-box: AXIOM changes the decision loop.
+White-box: AXIOM can turn proof feedback into training data.
 ```
 
 ---
 
-## 15. The AXIOM Loop
-
-AXIOM sits at the point where cybersecurity and AI autonomy converge.
-
-In the short term, cybersecurity governs AI actions through the Warrant Gate.
-
-In the long term, every blocked, suspended, or allowed warrant becomes structured proof feedback for future agents.
-
-This creates the AXIOM loop:
+## 27. The AXIOM Loop
 
 ```text
 Cybersecurity governs AI.
 AI learns from governance.
 Future agents become proof-native.
+The warrant remains external.
 ```
 
 A proof-native agent is not an agent that authorizes itself.
@@ -609,37 +1126,25 @@ A proof-native agent is not an agent that authorizes itself.
 It is an agent that becomes better at anticipating the proof required before requesting execution.
 
 ```text
-The model may become proof-native, but the warrant remains external.
+The model may become proof-native,
+but the warrant remains external.
 ```
-
-AXIOM turns cybersecurity decisions into structured proof feedback for the next generation of AI agents.
 
 ---
 
-## 16. Strategic Thesis
+## 28. RLPF
 
-AXIOM has three horizons.
-
-### Immediate Product: Warrant Gate
+RLPF means:
 
 ```text
-No proof, no critical execution.
+Reinforcement Learning from Proof Feedback
 ```
 
-The buyer gets:
+RLHF teaches models what humans prefer.
 
-```text
-risk reduction
-auditability
-compliance evidence
-control over AI agents
-safe automation
-CI/CD and DevSecOps governance
-```
+RLPF teaches agents what proof supports.
 
-### Long-Term Asset: Proof Ledger
-
-Every warrant creates a proof-labeled decision:
+A Proof Ledger creates training/evaluation data like:
 
 ```json
 {
@@ -651,330 +1156,335 @@ Every warrant creates a proof-labeled decision:
 }
 ```
 
-This is not a classic data label.
+This is not a classic label.
 
 It is an annotation of consequence.
 
-In v0.1.2, the Proof Ledger is implemented as a local JSONL hash chain for simplicity, transparency, and developer adoption.
+---
 
-At enterprise scale, ledger integrity, distribution, privacy, retention, interoperability, and external verification become first-class design concerns.
+## 29. Provider-Agnostic Evidence Layer
 
-The local ledger is the reference starting point, not the final enterprise architecture.
+v0.1.5 introduces provider-agnostic evidence.
 
-### Expansion: RLPF
-
-RLPF means:
+AXIOM can consume:
 
 ```text
-Reinforcement Learning from Proof Feedback
+local JSON
+JSONL
+external API payloads
+webhooks
+GitHub Actions
+GitLab CI
+Jenkins-like reports
+Semgrep/SAST reports
+manual approvals
+SIEM-like clearance reports
+rollback artifacts
+business risk systems
 ```
 
-RLHF teaches models what humans prefer.  
-RLPF teaches agents what proof supports.
+The principle:
 
 ```text
-The Warrant is the product.
-The Proof Ledger is the moat.
-RLPF is the expansion.
+Any evidence source
+        ↓
+Canonical Evidence Event
+        ↓
+Proof Router
+        ↓
+ProofVector
+        ↓
+AXIOM Kernel
+        ↓
+Execution Warrant
 ```
+
+GitHub is an integration.
+
+GitLab is an integration.
+
+DevSecOps is a first market wedge.
+
+AXIOM is the general Proof Warrant Protocol.
 
 ---
 
-## 17. The New Bottleneck
+## 30. Current Reference Implementation: v0.1.6
 
-The model era was, in significant part, limited by the availability of high-quality labeled data.
-
-The agent era will be limited by justified action.
+v0.1.6 includes:
 
 ```text
-Model era:
-raw data → labels → training datasets
-
-Agent era:
-proposed action → required proof → warrant decision → proof ledger
-```
-
-Scale AI industrialized labeled data for model perception.
-
-AXIOM aims to industrialize proof-labeled decisions for agent autonomy.
-
-```text
-Scale AI helped models learn to recognize.
-AXIOM helps agents learn to justify before acting.
-```
-
-In a world of autonomous agents, justification is what makes them deployable in production.
-
-
----
-
-## What Changed in v0.1.2
-
-v0.1.2 turns the cyber positioning into a concrete evidence-flow demo.
-
-It adds:
-
-- Semgrep-style scanner output examples;
-- scanner-derived `ProofVector` examples;
-- `security_policy.yml` for scanner-gated production deployment;
-- conformance tests for clean scan, missing scan, and failed scan;
-- README updates clarifying `Assessment Layer → Decision Layer → Execution Layer`;
-- updated reference version metadata.
-
-The purpose of v0.1.2 is narrow:
-
-```text
-prove that AXIOM consumes security evidence and turns it into execution decisions.
-```
-
----
-
-## 18. Reference Implementation Scope
-
-v0.1.2 is deterministic and local.
-
-Included:
-
-```text
-Action JSON input
-ProofVector JSON input
-Policy YAML input
+Deterministic policy engine
 Pydantic runtime models
-PolicyEngine separated from Evaluator
-RequirementVector generation
-Action Weight risk-bound check
-Coverage check
-Scope check
-Time check
-Contradiction check
-Limitation intersection
-Missing proof vs failed proof distinction
-Challenge Response
-ALLOW / CONDITIONAL / SUSPEND / REQUIRE_HUMAN_REVIEW / BLOCK
-HMAC-signed warrant
-JSONL proof ledger with hash chain
-verify command
-ledger verify command
-conformance tests
+ProofVector / RequirementVector evaluation
+Action Weight policy checks
+Scope checks
+Freshness checks
+Contradiction checks
+Limitation checks
+Execution Warrant generation
+HMAC signature verification
+JSONL hash-chain Proof Ledger
+Proof Router
+Canonical Evidence Event loader
+Local JSON / JSONL evidence support
+External API / webhook evidence support
+Semgrep connector
+Provider-agnostic CI adapter
+Provider-agnostic human review adapter
+Rollback adapter
+Manual / SIEM-style adapter examples
+Source Verifiers MVP
+ActionEnvelope / Claim / VerifiedEvidence schemas
+`verify-action` CLI
+`POST /v1/actions/evaluate` API endpoint
+DevOps production deployment source-verified demo
+GitHub Action Warrant Gate
+GitLab CI Warrant Gate example
+FastAPI endpoints
+CLI commands
+Conformance tests
+Unit tests
+Integration tests
 ```
 
-Excluded from v0.1.2:
+Packaged verification target:
 
 ```text
-LLM as final decision-maker
-fine-tuning
-JWS / Ed25519 / RSA signatures
-automatic enterprise-wide interception
-dynamic deception
-full cloud integration
-offensive cyber actions
-```
-
-v0.1.2 law:
-
-```text
-No LLM in the final authorization path.
+51 tests passing
 ```
 
 ---
 
-## 19. Quick Start
+## 31. Quick Start
 
 ```bash
-cd axiom-proof-warrant-protocol-v0.1.2
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-PYTHONPATH=reference/python pytest tests/conformance
+
+PYTHONPATH=reference/python pytest tests -q
 ```
 
-Expected result:
+Expected packaged result:
 
 ```text
-6 passed
+51 passed
 ```
 
-Run a suspended warrant example:
+---
+
+## 32. Demo 1 — General Proof-of-Action Protocol
+
+This demo shows AXIOM outside CI/CD.
+
+It uses a wire-transfer action and local evidence JSON.
+
+Clean evidence:
 
 ```bash
-PYTHONPATH=reference/python python -m axiom.cli eval \
-  --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.missing_proof_vector.json \
-  --policy examples/production_policy.yml \
-  --out examples/demo.suspend.warrant.json \
+PYTHONPATH=reference/python python -m axiom.cli evidence-eval \
+  --action examples/generic/wire_transfer.action.json \
+  --evidence examples/generic/wire_transfer_clean.evidence.json \
+  --policy examples/generic/wire_transfer_policy.yml \
+  --out examples/demo.wire_transfer.allow.warrant.json \
   --ledger data/demo_ledger.jsonl
 ```
 
-Run an allowed warrant example:
+Expected:
+
+```text
+Decision: ALLOW
+```
+
+High-risk evidence:
 
 ```bash
-PYTHONPATH=reference/python python -m axiom.cli eval \
-  --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.good_proof_vector.json \
-  --policy examples/production_policy.yml \
-  --out examples/demo.allow.warrant.json \
+PYTHONPATH=reference/python python -m axiom.cli evidence-eval \
+  --action examples/generic/wire_transfer.action.json \
+  --evidence examples/generic/wire_transfer_high_risk.evidence.json \
+  --policy examples/generic/wire_transfer_policy.yml \
+  --out examples/demo.wire_transfer.block.warrant.json \
   --ledger data/demo_ledger.jsonl
 ```
 
-Run a blocked warrant example:
+Expected:
 
-```bash
-PYTHONPATH=reference/python python -m axiom.cli eval \
-  --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.failed_security_scan.proof_vector.json \
-  --policy examples/production_policy.yml \
-  --out examples/demo.block.warrant.json \
-  --ledger data/demo_ledger.jsonl
+```text
+Decision: BLOCK
 ```
 
-Verify the ledger:
+Ledger verification:
 
 ```bash
 PYTHONPATH=reference/python python -m axiom.cli ledger-verify \
   --ledger data/demo_ledger.jsonl
 ```
 
-Expected result:
+Expected:
 
 ```text
 LEDGER VALID
 ```
 
+Message:
 
+```text
+CI/CD is one use case.
+AXIOM is evidence-first and provider-agnostic.
+```
 
-Run the v0.1.2 Semgrep failed-scan example:
+---
+
+## 33. Demo 2 — DevSecOps Warrant Gate
+
+This demo shows AXIOM as a DevSecOps Warrant Gate.
+
+```text
+CI evidence
+Security scan evidence
+Human review evidence
+Rollback evidence
+        ↓
+Proof Router
+        ↓
+AXIOM Kernel
+        ↓
+Execution Warrant
+        ↓
+Merge/deploy allowed or blocked
+```
+
+Generate Semgrep proof:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli semgrep-proof \
+  --report examples/scanners/semgrep_failed_scan.json \
+  --target payment-api \
+  --environment production \
+  --commit abc123 \
+  --out examples/demo.semgrep.partial_proof_vector.json
+```
+
+Generate CI proof:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli ci-proof \
+  --report examples/github/check_runs_passed.json \
+  --target payment-api \
+  --environment production \
+  --commit abc123 \
+  --out examples/demo.ci.partial_proof_vector.json
+```
+
+Generate review proof:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli review-proof \
+  --report examples/github/pr_reviews_approved.json \
+  --target payment-api \
+  --environment production \
+  --commit abc123 \
+  --out examples/demo.review.partial_proof_vector.json
+```
+
+Generate rollback proof:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli rollback-proof \
+  --report examples/rollback/rollback_plan_available.json \
+  --target payment-api \
+  --environment production \
+  --commit abc123 \
+  --out examples/demo.rollback.partial_proof_vector.json
+```
+
+Merge proof:
+
+```bash
+PYTHONPATH=reference/python python -m axiom.cli merge-proof \
+  --proof examples/demo.semgrep.partial_proof_vector.json \
+  --proof examples/demo.ci.partial_proof_vector.json \
+  --proof examples/demo.review.partial_proof_vector.json \
+  --proof examples/demo.rollback.partial_proof_vector.json \
+  --out examples/demo.merged_proof_vector.json
+```
+
+Evaluate:
 
 ```bash
 PYTHONPATH=reference/python python -m axiom.cli eval \
   --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.semgrep_failed.proof_vector.json \
+  --proof examples/demo.merged_proof_vector.json \
   --policy examples/security_policy.yml \
-  --out examples/output.semgrep.block.warrant.json \
+  --out examples/demo.devsecops.warrant.json \
   --ledger data/demo_ledger.jsonl
 ```
 
-Expected result:
+With failed Semgrep evidence, expected:
 
 ```text
 Decision: BLOCK
 ```
 
-Run the v0.1.2 missing-scan example:
-
-```bash
-PYTHONPATH=reference/python python -m axiom.cli eval \
-  --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.semgrep_missing.proof_vector.json \
-  --policy examples/security_policy.yml \
-  --out examples/output.semgrep.suspend.warrant.json \
-  --ledger data/demo_ledger.jsonl
-```
-
-Expected result:
+Message:
 
 ```text
-Decision: SUSPEND
-```
-
-Run the v0.1.2 clean-scan example:
-
-```bash
-PYTHONPATH=reference/python python -m axiom.cli eval \
-  --action examples/deploy_payment_api.action.json \
-  --proof examples/deploy_payment_api.semgrep_clean.proof_vector.json \
-  --policy examples/security_policy.yml \
-  --out examples/output.semgrep.allow.warrant.json \
-  --ledger data/demo_ledger.jsonl
-```
-
-Expected result:
-
-```text
-Decision: ALLOW
+No valid Execution Warrant → no merge.
 ```
 
 ---
 
-## 20. Roadmap
+## 34. GitHub and GitLab
 
-### v0.2 — Evidence Connectors
-
-Connect AXIOM to real evidence:
+AXIOM includes installable DevSecOps examples:
 
 ```text
-Git diff
-JUnit
-GitHub Actions
-GitLab CI
-Semgrep
-Snyk
-Terraform plan
-Kubernetes events
-EDR JSON
-SIEM logs
+.github/workflows/axiom-warrant-gate.yml
+.gitlab-ci.yml
 ```
 
-### v0.3 — AXIOM Code Gate
+These demonstrate how CI/CD systems can act as enforcement points.
 
-Gate AI-generated code before merge and deployment:
+The important architecture is not GitHub or GitLab.
 
-```text
-AI-generated PR checks
-merge warrant
-deployment warrant
-permission regression gates
-security-sensitive code gates
-GitHub Action
-GitLab CI template
-```
-
-### v0.4 — Runtime Enforcement Integrations
-
-Make real systems warrant-gated:
+The important architecture is:
 
 ```text
-CI/CD plugin
-Kubernetes admission controller
-API gateway
-SOAR connector
-agent runtime wrapper
-CLI wrappers
-Terraform wrapper
-kubectl wrapper
-```
-
-### v0.5 — Proof Fabric
-
-Make warrants portable and verifiable across systems:
-
-```text
-portable warrants
-cross-system verification
-federated proof exchange
-revocation registry
-third-party auditors
-vendor-neutral warrant validation
-```
-
-### v1.0 — Epistemic Learning Layer
-
-Turn proof outcomes into model-improvement signals:
-
-```text
-Proof Ledger → training assets
-missing evidence examples
-negative overclaim examples
-positive verified examples
-proof pattern examples
-model steering
-proof-aware adapters
-proof-native model evaluation
-RLPF datasets
+Pipeline produces evidence.
+AXIOM evaluates proof.
+The gate fails if the warrant is not ALLOW.
 ```
 
 ---
 
-## 21. Security Boundaries
+## 35. FastAPI Control Plane
+
+v0.1.6 includes a minimal FastAPI control plane.
+
+Endpoints:
+
+```text
+GET  /health
+POST /v1/actions/evaluate
+POST /v1/warrants/evaluate
+POST /v1/evidence/convert
+POST /v1/warrants/evaluate-from-evidence
+```
+
+Run locally:
+
+```bash
+PYTHONPATH=reference/python uvicorn axiom.api:app --reload
+```
+
+The API is intentionally minimal.
+
+It exists to demonstrate that AXIOM can become a control plane, not only a CLI.
+
+---
+
+## 36. Security Boundaries
 
 AXIOM can guarantee only what is routed through its enforcement points.
 
@@ -998,8 +1508,8 @@ absolute truth
 perfect security
 interception of non-instrumented paths
 absence of human error
-honesty of all external systems
-correctness of all evidence sources
+honesty of every external system
+correctness of every evidence source
 quality of the base model
 impossibility of attack
 ```
@@ -1008,32 +1518,176 @@ Precise claim:
 
 ```text
 AXIOM does not make attacks impossible.
-AXIOM makes unjustified critical actions impossible to authorize properly when execution is warrant-gated.
+AXIOM makes unjustified critical actions impossible to authorize properly
+when execution is warrant-gated.
 ```
 
 ---
 
-## 22. Final Manifesto
+## 37. Standard Strategy
+
+AXIOM should not try to do everything.
+
+AXIOM should define what every critical autonomous system should produce before acting:
+
+```text
+evidence
+decision
+warrant
+ledger entry
+```
+
+The standard surface is:
+
+```text
+Canonical Evidence Event
+ProofVector
+RequirementVector
+Execution Warrant
+Proof Ledger Entry
+```
+
+The strategic defense is not that the JSON format is impossible to copy.
+
+The defense is:
+
+```text
+neutrality
+open source adoption
+provider-agnostic adapters
+community
+conformance tests
+Proof Ledger data moat
+```
+
+AXIOM's long-term position depends on becoming the neutral proof-of-action layer before closed ecosystems fragment the market.
+
+---
+
+## 38. Business Perspective
+
+AXIOM is not best positioned as a low-ticket productivity tool.
+
+Its strongest wedge is critical-action governance.
+
+Potential offerings:
+
+```text
+Proof Gap & Shadow Agent Assessment
+Warrant Gate Pilot
+AXIOM Control Plane
+Proof Ledger analytics
+Compliance and audit export
+Enterprise adapters
+```
+
+Value is tied to:
+
+```text
+risk reduction
+auditability
+production safety
+agent governance
+regulatory readiness
+incident reconstruction
+controlled autonomous execution
+```
+
+The first buyer is likely not a casual developer.
+
+The first buyer is likely:
+
+```text
+CISO / RSSI
+VP Engineering
+Head of Platform
+Head of DevSecOps
+CTO
+AI Governance lead
+```
+
+---
+
+## 39. Roadmap
+
+### v0.1.x — Reference Protocol
+
+```text
+stabilize schemas
+improve README and RFC
+release provider-agnostic evidence examples
+add conformance fixtures
+```
+
+### v0.2 — Evidence Connectors
+
+```text
+GitHub live API
+GitLab live API
+Snyk
+Semgrep
+SIEM / EDR
+Jira / ServiceNow approvals
+Cloud IAM / policy signals
+```
+
+### v0.3 — Enforcement Points
+
+```text
+GitHub Action hardening
+GitLab CI hardening
+Kubernetes admission controller
+API gateway plugin
+agent runtime wrapper
+Claude Code hook integration
+OpenAI Agents SDK integration
+```
+
+### v0.4 — Control Plane
+
+```text
+central API
+warrant registry
+ledger verification
+policy management
+evidence ingestion
+tenant isolation
+```
+
+### v1.0 — Enterprise Proof Fabric
+
+```text
+distributed ledger
+external auditor verification
+provider-neutral warrant validation
+compliance export
+proof analytics
+RLPF dataset generation
+```
+
+---
+
+## 40. Final Manifesto
 
 AXIOM does not control by trust.
 
 AXIOM controls by proof.
 
-It does not ask whether an AI sounds confident.
+It does not ask whether an agent sounds confident.
 
-It asks what the evidence allows the AI to claim.
+It asks what the evidence allows the agent to do.
 
 It does not ask whether an actor has permission alone.
 
-It asks whether the action is justified, scoped, reversible, risk-bounded, and auditable.
+It asks whether the action is justified, scoped, fresh, risk-bounded, reversible when needed, and auditable.
 
-It does not turn proof into a score.
+It does not turn proof into a shallow score.
 
 It turns proof into boundaries.
 
-It does not make models powerful by making them more confident.
+It does not make agents powerful by making them more confident.
 
-It makes them powerful by forcing their actions to become provable.
+It makes them usable by forcing their actions to become provable.
 
 ```text
 No certainty beyond evidence.
@@ -1042,8 +1696,11 @@ No warrant beyond context.
 No action beyond proportional proof.
 ```
 
-AXIOM turns static permission into proof-weighted authorization.
+AXIOM makes autonomous actions controllable, credible, and auditable.
 
-AXIOM transforms a model that answers well into an agent that knows when it has earned the right to act.
+AXIOM is the Proof-of-Action Layer for critical autonomous systems.
 
-AXIOM is the proof-warrant protocol for critical AI actions.
+```text
+No proof, no warrant.
+No warrant, no critical action.
+```

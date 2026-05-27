@@ -1,0 +1,91 @@
+{
+  "actor": {
+    "actor_id": "agent_ops_01",
+    "actor_type": "ai_ops_agent",
+    "identity_verified": true
+  },
+  "action": {
+    "action_type": "deploy_to_production",
+    "target": "prod.payment-api",
+    "environment": "production"
+  },
+  "claim": {
+    "summary": "Deploy payment-api after verified patch.",
+    "requested_by": "agent_ops_01"
+  },
+  "action_weight": {
+    "final_weight": 0.86,
+    "criticality": "high"
+  },
+  "risk_profile": {
+    "criticality": "high",
+    "blast_radius": "customer_payments",
+    "reversible": true,
+    "data_sensitivity": "high",
+    "score": 0.86
+  },
+  "evidence_claims": [
+    {
+      "claim_id": "clm_change_ticket",
+      "type": "jira_ticket",
+      "ref": "CHG-1001",
+      "dimension": "change_ticket_approved",
+      "required_status": "approved",
+      "target": "prod.payment-api",
+      "environment": "production",
+      "max_age_hours": 72
+    },
+    {
+      "claim_id": "clm_pr_review",
+      "type": "github_pr",
+      "ref": "42",
+      "dimension": "github_pr_approved",
+      "min_approvals": 2,
+      "required_checks": [
+        "unit-tests",
+        "integration-tests",
+        "semgrep"
+      ],
+      "commit": "abc123",
+      "target": "prod.payment-api",
+      "environment": "production"
+    },
+    {
+      "claim_id": "clm_ci_run",
+      "type": "ci_run",
+      "ref": "run-9001",
+      "dimension": "ci_checks_passed",
+      "required_checks": [
+        "unit-tests",
+        "integration-tests"
+      ],
+      "target": "prod.payment-api",
+      "environment": "production"
+    },
+    {
+      "claim_id": "clm_security_scan",
+      "type": "security_scan",
+      "ref": "scan-9002",
+      "dimension": "security_scan_clean",
+      "target": "prod.payment-api",
+      "environment": "production"
+    },
+    {
+      "claim_id": "clm_rollback",
+      "type": "rollback_plan",
+      "ref": "rb-payment-api-v1",
+      "dimension": "rollback_available",
+      "target": "prod.payment-api",
+      "environment": "production",
+      "max_age_hours": 168
+    },
+    {
+      "claim_id": "clm_deployment_window",
+      "type": "deployment_window",
+      "ref": "window-prod-standard",
+      "dimension": "deployment_window_allowed",
+      "target": "prod.payment-api",
+      "environment": "production"
+    }
+  ]
+}

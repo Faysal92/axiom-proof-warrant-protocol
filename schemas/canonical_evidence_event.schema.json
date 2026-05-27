@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AXIOM Canonical Evidence Event",
+  "type": "object",
+  "required": ["event_id", "source", "subject", "claims"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["provider", "kind"],
+      "properties": {
+        "provider": { "type": "string" },
+        "kind": { "type": "string" },
+        "name": { "type": ["string", "null"] },
+        "trust_level": { "type": "string", "default": "medium" },
+        "collected_at": { "type": ["integer", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "action_id": { "type": ["string", "null"] },
+        "target": { "type": "string" },
+        "environment": { "type": "string" },
+        "commit": { "type": ["string", "null"] },
+        "branch": { "type": ["string", "null"] },
+        "service": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "claims": { "type": "object", "additionalProperties": true },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } },
+    "limitations": { "type": "array", "items": { "type": "object" } },
+    "contradictions": { "type": "array", "items": { "type": "object" } },
+    "meta": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": true
+}

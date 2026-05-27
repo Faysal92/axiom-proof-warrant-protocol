@@ -1,0 +1,29 @@
+{
+  "actor": {
+    "actor_id": "finance_agent_01",
+    "actor_type": "ai_agent",
+    "identity_verified": true
+  },
+  "action": {
+    "action_type": "execute_wire_transfer",
+    "target": "wire-transfer",
+    "environment": "production"
+  },
+  "claim": {
+    "text": "The beneficiary is verified and the transfer risk is below policy threshold.",
+    "critical": true
+  },
+  "action_weight": {
+    "criticality": 0.9,
+    "irreversibility": 0.95,
+    "blast_radius": 0.6,
+    "data_sensitivity": 0.9,
+    "business_impact": 0.95,
+    "final_weight": 0.86,
+    "weighting_policy": {
+      "policy_id": "finance_wire_transfer_critical_v0.1",
+      "policy_version": "0.1.0",
+      "calculation_method": "weighted_average"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+policy_id: devops_prod_source_verified_policy
+policy_version: 0.1.6
+requirement:
+  action: deploy_to_production
+  target: prod.payment-api
+  context:
+    description: Production deployment must be backed by source-verified evidence.
+  min_meta:
+    required_level: P4_EXECUTED
+    max_age_seconds: 86400
+  required_scope:
+    target: prod.payment-api
+    environment: production
+    action_type: deploy_to_production
+  mandatory_dimensions:
+  - change_ticket_approved
+  - github_pr_approved
+  - ci_checks_passed
+  - security_scan_clean
+  - rollback_available
+  - deployment_window_allowed
+  critical_requirements:
+  - security_scan_clean
+  risk_policy:
+    block_on_failed_security_scan: true
+    max_risk_score: 0.95

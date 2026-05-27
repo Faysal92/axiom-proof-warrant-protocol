@@ -1,24 +1,46 @@
 {
-  "tool": "semgrep",
-  "tool_version": "1.x",
-  "scan_status": "failed",
-  "target": "payment-api",
-  "commit": "abc123",
-  "critical_findings": 1,
-  "high_findings": 2,
-  "medium_findings": 3,
-  "report_ref": "semgrep_report_failed_001",
-  "findings": [
+  "version": "1.85.0",
+  "results": [
     {
-      "id": "auth-bypass-pattern",
-      "severity": "critical",
-      "summary": "Potential authentication bypass in payment authorization flow."
+      "check_id": "python.django.security.audit.auth-bypass",
+      "path": "payment_api/auth.py",
+      "start": {
+        "line": 42,
+        "col": 5
+      },
+      "end": {
+        "line": 45,
+        "col": 20
+      },
+      "extra": {
+        "message": "Possible authentication bypass in payment API.",
+        "severity": "ERROR",
+        "metadata": {
+          "category": "security",
+          "confidence": "HIGH"
+        }
+      }
     },
     {
-      "id": "unsafe-token-handling",
-      "severity": "high",
-      "summary": "Token validation may be bypassed under specific request conditions."
+      "check_id": "python.jwt.security.unsafe-token-handling",
+      "path": "payment_api/tokens.py",
+      "start": {
+        "line": 17,
+        "col": 1
+      },
+      "end": {
+        "line": 25,
+        "col": 1
+      },
+      "extra": {
+        "message": "Token validation may be bypassed under specific request conditions.",
+        "severity": "WARNING",
+        "metadata": {
+          "category": "security",
+          "confidence": "MEDIUM"
+        }
+      }
     }
   ],
-  "timestamp": "2026-05-24T18:00:00Z"
+  "errors": []
 }

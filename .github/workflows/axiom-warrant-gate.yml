@@ -1,0 +1,283 @@
+name: AXIOM Warrant Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: "Demo scenario to run through AXIOM"
+        required: true
+        default: "allow"
+        type: choice
+        options:
+          - allow
+          - block_security
+          - require_human_review
+          - suspend_ci
+          - rollback_missing
+
+env:
+  AXIOM_SCENARIO: ${{ github.event_name == 'workflow_dispatch' && inputs.scenario || 'allow' }}
+  AXIOM_TARGET: payment-api
+  AXIOM_ENVIRONMENT: production
+  AXIOM_SERVICE: payments
+  BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  ci_agent:
+    name: CI Evidence Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit tests
+        id: unit_tests
+        continue-on-error: true
+        run: PYTHONPATH=reference/python pytest tests/conformance -q
+
+      - name: Integration tests
+        id: integration_tests
+        continue-on-error: true
+        run: |
+          if [ "$AXIOM_SCENARIO" = "suspend_ci" ]; then
+            echo "Simulating failed integration tests for AXIOM scenario: $AXIOM_SCENARIO"
+            exit 1
+          fi
+          echo "Simulated integration tests passed."
+
+      - name: Build CI proof input
+        run: |
+          python examples/github_action/build_ci_report.py \
+            --out artifacts/ci_report.json \
+            --target "$AXIOM_TARGET" \
+            --sha "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --unit-status "${{ steps.unit_tests.outcome }}" \
+            --integration-status "${{ steps.integration_tests.outcome }}" \
+            --unit-run-id "${{ github.run_id }}-unit" \
+            --integration-run-id "${{ github.run_id }}-integration"
+
+      - name: Upload CI proof input
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci_report
+          path: artifacts/ci_report.json
+
+  security_agent:
+    name: Security Evidence Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build scanner proof input
+        run: |
+          mkdir -p artifacts
+          if [ "$AXIOM_SCENARIO" = "block_security" ]; then
+            cp examples/scanners/semgrep_failed_scan.json artifacts/semgrep_report.json
+          else
+            cp examples/scanners/semgrep_clean_scan.json artifacts/semgrep_report.json
+          fi
+          cat artifacts/semgrep_report.json
+
+      - name: Upload scanner proof input
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep_report
+          path: artifacts/semgrep_report.json
+
+  review_agent:
+    name: Human Review Evidence Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build PR review proof input
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number || '0' }}
+        run: |
+          LIVE_ARG=""
+          if [ "${AXIOM_LIVE_GITHUB_REVIEWS:-false}" = "true" ]; then
+            LIVE_ARG="--live"
+          fi
+
+          python examples/github_action/build_review_report.py \
+            --out artifacts/pr_reviews.json \
+            --target "$AXIOM_TARGET" \
+            --sha "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --pr-number "$PR_NUMBER" \
+            --scenario "$AXIOM_SCENARIO" \
+            $LIVE_ARG
+
+      - name: Upload PR review proof input
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr_reviews
+          path: artifacts/pr_reviews.json
+
+  rollback_agent:
+    name: Rollback Evidence Agent
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build rollback proof input
+        run: |
+          python examples/github_action/build_rollback_report.py \
+            --out artifacts/rollback_plan.json \
+            --target "$AXIOM_TARGET" \
+            --environment "$AXIOM_ENVIRONMENT" \
+            --sha "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --scenario "$AXIOM_SCENARIO"
+
+      - name: Upload rollback proof input
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback_plan
+          path: artifacts/rollback_plan.json
+
+  axiom_warrant_gate:
+    name: AXIOM Warrant Gate
+    runs-on: ubuntu-latest
+    needs:
+      - ci_agent
+      - security_agent
+      - review_agent
+      - rollback_agent
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download proof inputs
+        uses: actions/download-artifact@v4
+        with:
+          path: proof-inputs
+
+      - name: Convert evidence reports into partial ProofVectors
+        run: |
+          mkdir -p artifacts
+
+          PYTHONPATH=reference/python python -m axiom.cli github-checks-proof \
+            --report proof-inputs/ci_report/ci_report.json \
+            --out artifacts/ci.partial_proof_vector.json \
+            --target "$AXIOM_TARGET" \
+            --environment "$AXIOM_ENVIRONMENT" \
+            --commit "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --service "$AXIOM_SERVICE"
+
+          PYTHONPATH=reference/python python -m axiom.cli semgrep-proof \
+            --report proof-inputs/semgrep_report/semgrep_report.json \
+            --out artifacts/security.partial_proof_vector.json \
+            --target "$AXIOM_TARGET" \
+            --environment "$AXIOM_ENVIRONMENT" \
+            --commit "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --service "$AXIOM_SERVICE"
+
+          PYTHONPATH=reference/python python -m axiom.cli github-reviews-proof \
+            --report proof-inputs/pr_reviews/pr_reviews.json \
+            --out artifacts/review.partial_proof_vector.json \
+            --target "$AXIOM_TARGET" \
+            --environment "$AXIOM_ENVIRONMENT" \
+            --commit "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --service "$AXIOM_SERVICE"
+
+          PYTHONPATH=reference/python python -m axiom.cli rollback-proof \
+            --report proof-inputs/rollback_plan/rollback_plan.json \
+            --out artifacts/rollback.partial_proof_vector.json \
+            --target "$AXIOM_TARGET" \
+            --environment "$AXIOM_ENVIRONMENT" \
+            --commit "$GITHUB_SHA" \
+            --branch "$BRANCH_NAME" \
+            --service "$AXIOM_SERVICE"
+
+      - name: Merge partial ProofVectors
+        run: |
+          PYTHONPATH=reference/python python -m axiom.cli merge-proof \
+            --proof artifacts/ci.partial_proof_vector.json \
+            --proof artifacts/security.partial_proof_vector.json \
+            --proof artifacts/review.partial_proof_vector.json \
+            --proof artifacts/rollback.partial_proof_vector.json \
+            --out artifacts/final.proof_vector.json
+
+      - name: Evaluate AXIOM warrant
+        run: |
+          PYTHONPATH=reference/python python -m axiom.cli eval \
+            --action examples/deploy_payment_api.action.json \
+            --proof artifacts/final.proof_vector.json \
+            --policy examples/security_policy.yml \
+            --out artifacts/execution_warrant.json \
+            --ledger artifacts/proof_ledger.jsonl
+
+          DECISION=$(python - <<'PY'
+          import json
+          with open('artifacts/execution_warrant.json', 'r', encoding='utf-8') as f:
+              print(json.load(f)['decision'])
+          PY
+          )
+
+          echo "AXIOM_DECISION=$DECISION" >> "$GITHUB_ENV"
+          echo "## AXIOM Warrant Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Decision: **$DECISION**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          python -m json.tool artifacts/execution_warrant.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify Proof Ledger
+        run: |
+          PYTHONPATH=reference/python python -m axiom.cli ledger-verify \
+            --ledger artifacts/proof_ledger.jsonl
+
+      - name: Upload AXIOM warrant artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axiom_warrant_artifacts
+          path: artifacts/
+
+      - name: Enforce warrant decision
+        run: |
+          if [ "$AXIOM_DECISION" != "ALLOW" ]; then
+            echo "AXIOM refused this critical action: $AXIOM_DECISION"
+            echo "No valid Execution Warrant → no merge."
+            exit 1
+          fi
+          echo "AXIOM issued ALLOW. Merge may proceed if all other branch protection rules pass."

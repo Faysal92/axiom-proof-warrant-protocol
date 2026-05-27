@@ -1,0 +1,26 @@
+policy_id: finance_wire_transfer_critical_v0.1
+policy_version: 0.1.0
+
+requirement:
+  action: execute_wire_transfer
+  target: wire-transfer
+  context:
+    environment: production
+    criticality: critical
+    data_sensitivity: high
+  min_meta:
+    required_level: P4_EXECUTED
+    max_age_seconds: 864000
+    required_source_trust: high
+  required_scope:
+    target: wire-transfer
+    environment: production
+  mandatory_dimensions:
+    - beneficiary_verified
+    - fraud_score_below_threshold
+    - human_reviewed
+  critical_requirements:
+    - fraud_risk
+  risk_policy:
+    max_risk_score: 1.0
+    human_approval_required: true

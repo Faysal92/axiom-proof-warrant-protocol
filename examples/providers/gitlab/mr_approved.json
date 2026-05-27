@@ -1,0 +1,10 @@
+{
+  "provider": "gitlab",
+  "merge_request_iid": "42",
+  "target": "payment-api",
+  "commit": "sha456",
+  "branch": "main",
+  "reviews": [
+    {"id": "mr_approval_1", "state": "APPROVED", "user": "tech-lead@company.com"}
+  ]
+}

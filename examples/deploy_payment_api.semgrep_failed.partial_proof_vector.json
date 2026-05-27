@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "proof_level": "P4_EXECUTED",
+    "source_trust": "high",
+    "freshness_epoch": 1779100000,
+    "reproducibility": "reproducible",
+    "independence": "single_source"
+  },
+  "scope": {
+    "target": "payment-api",
+    "commit": "abc123",
+    "branch": "main",
+    "environment": "production",
+    "service": "payments"
+  },
+  "dimensions": {
+    "security_scan_clean": {
+      "status": "failed",
+      "tool": "semgrep",
+      "report_ref": "semgrep_report:semgrep_failed_scan.json",
+      "blocking_findings": 1,
+      "total_findings": 2
+    }
+  },
+  "security_evidence": {
+    "scanner": "semgrep",
+    "scan_status": "failed",
+    "report_ref": "semgrep_report:semgrep_failed_scan.json",
+    "blocking_findings": 1,
+    "total_findings": 2
+  },
+  "limitations": [],
+  "contradictions": [
+    {
+      "type": "security_scan_failure",
+      "severity": "critical",
+      "summary": "Semgrep reported 1 blocking finding(s).",
+      "report_ref": "semgrep_report:semgrep_failed_scan.json"
+    }
+  ],
+  "evidence_refs": [
+    "semgrep_report:semgrep_failed_scan.json"
+  ]
+}
